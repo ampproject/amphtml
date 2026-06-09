@@ -6,24 +6,26 @@
   "vars": {
     "os": "mweb",
     "sdk_ver": "0.0.0",
-    "app_ver": "1",
+    "app_ver": "1.0",
     "device_tz": "${timezone}",
     "os_platform": "${userAgent}",
     "unique_id": "${clientId(moe_uuid)}",
     "dataCenter": "sdk-01",
     "integration_type": "AMP"
   },
+  "extraUrlParams": {
+    "identifiers": {},
+    "meta": {
+      "bid": "${random}",
+      "request_time": "${timestamp}",
+      "integration_type": "${integration_type}"
+    }
+  },
   "triggers": {
     "pageViewed": {
       "on": "visible",
       "request": "event",
       "extraUrlParams": {
-        "identifiers": {},
-        "meta": {
-          "bid": "${random}",
-          "request_time": "${timestamp}",
-          "integration_type": "${integration_type}"
-        },
         "viewsCount": 1,
         "viewsInfo": [
           {
@@ -42,15 +44,7 @@
     },
     "deviceRegister": {
       "on": "visible",
-      "request": "addDevice",
-      "extraUrlParams": {
-        "identifiers": {},
-        "meta": {
-          "bid": "${random}",
-          "request_time": "${timestamp}",
-          "integration_type": "${integration_type}"
-        }
-      }
+      "request": "addDevice"
     }
   },
   "transport": {
