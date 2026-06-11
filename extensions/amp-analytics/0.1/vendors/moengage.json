@@ -1,7 +1,8 @@
 {
   "requests": {
     "addDevice": "https://${dataCenter}.moengage.com/v2/device/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}&isAmp=true",
-    "event": "https://${dataCenter}.moengage.com/v2/sdk/report/${appId}?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}"
+    "event": "https://${dataCenter}.moengage.com/v2/report/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}",
+    "eventV2": "https://${dataCenter}.moengage.com/v2/sdk/report/${appId}?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}"
   },
   "vars": {
     "os": "mweb",
@@ -14,17 +15,22 @@
     "integration_type": "AMP"
   },
   "extraUrlParams": {
+    "a": {
+      "timestamp": "${timestamp}",
+      "URL": "${ampdocUrl}"
+    },
     "identifiers": {},
     "meta": {
       "bid": "${random}",
       "request_time": "${timestamp}",
       "integration_type": "${integration_type}"
-    }
+    },
+    "url": "${ampdocUrl}"
   },
   "triggers": {
     "pageViewed": {
       "on": "visible",
-      "request": "event",
+      "request": "eventV2",
       "extraUrlParams": {
         "viewsCount": 1,
         "viewsInfo": [
@@ -49,6 +55,7 @@
   },
   "transport": {
     "xhrpost": true,
+    "beacon": true,
     "useBody": true
   }
 }
