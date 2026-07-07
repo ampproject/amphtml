@@ -1197,12 +1197,19 @@ For complete documentation and additional examples please see: https://marketing
         "clickTrigger": {
           "on": "click",
           "selector": "#test1",
-          "request": "event",
+          "request": "eventV2",
           "extraUrlParams": {
-            "a": {
-              "title": "${title}"
-            },
-            "e": "AMP example button click"
+            "viewsCount": 1,
+            "viewsInfo": [
+              {
+                "EVENT_ACTION": "AMP_BUTTON_CLICK",
+                "EVENT_ATTRS": {
+                  "button_title": "${title}"
+                },
+                "EVENT_G_TIME": "${timestamp}",
+                "EVENT_L_TIME": "${timestamp}"
+              }
+            ]
           }
         }
       }
