@@ -15,17 +15,12 @@
     "integration_type": "AMP"
   },
   "extraUrlParams": {
-    "a": {
-      "timestamp": "${timestamp}",
-      "URL": "${ampdocUrl}"
-    },
     "identifiers": {},
     "meta": {
       "bid": "${random}",
       "request_time": "${timestamp}",
       "integration_type": "${integration_type}"
-    },
-    "url": "${ampdocUrl}"
+    }
   },
   "triggers": {
     "pageViewed": {
