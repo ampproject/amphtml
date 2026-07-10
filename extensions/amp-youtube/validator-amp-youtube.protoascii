@@ -41,12 +41,17 @@ tags: {  # <amp-youtube>
   }
   attrs: {
     name: "data-live-channelid"
-    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid', 'data-channelid']"
     value_regex: "[^=/?:]+"
   }
   attrs: {
     name: "data-videoid"
-    mandatory_oneof: "['data-live-channelid', 'data-videoid']"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid', 'data-channelid']"
+    value_regex: "[^=/?:]+"
+  }
+  attrs: {
+    name: "data-channelid"
+    mandatory_oneof: "['data-live-channelid', 'data-videoid', 'data-channelid']"
     value_regex: "[^=/?:]+"
   }
   attrs: {

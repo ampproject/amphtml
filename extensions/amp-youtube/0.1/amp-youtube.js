@@ -69,6 +69,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private {?string} */
     this.liveChannelid_ = null;
 
+    /** @private {?string} */
+    this.channelid_ = null;
+
     /** @private {?boolean}  */
     this.muted_ = false;
 
@@ -137,6 +140,7 @@ class AmpYoutube extends AMP.BaseElement {
   buildCallback() {
     this.videoid_ = this.getVideoId_();
     this.liveChannelid_ = this.getLiveChannelId_();
+    this.channelid_ = this.getChannelId_();
     this.assertDatasourceExists_();
 
     const deferred = new Deferred();
@@ -156,7 +160,11 @@ class AmpYoutube extends AMP.BaseElement {
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
     const descriptor = this.videoid_
       ? `${encodeURIComponent(this.videoid_ || '')}?`
-      : `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
+      : this.liveChannelid_
+      ? `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`
+      : // Channel embeds use the channel's uploads playlist. The uploads
+        // playlist id is the channel id prefixed with "UU".
+        `?listType=playlist&list=UU${encodeURIComponent(this.channelid_ || '')}&`;
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
@@ -335,6 +343,14 @@ class AmpYoutube extends AMP.BaseElement {
    * @return {?string}
    * @private
    */
+  getChannelId_() {
+    return this.element.getAttribute('data-channelid');
+  }
+
+  /**
+   * @return {?string}
+   * @private
+   */
   getVideoId_() {
     return this.element.getAttribute('data-videoid');
   }
@@ -353,11 +369,13 @@ class AmpYoutube extends AMP.BaseElement {
   assertDatasourceExists_() {
     const datasourceExists =
       !(this.videoid_ && this.liveChannelid_) &&
-      (this.videoid_ || this.liveChannelid_);
+      !(this.videoid_ && this.channelid_) &&
+      !(this.liveChannelid_ && this.channelid_) &&
+      (this.videoid_ || this.liveChannelid_ || this.channelid_);
     userAssert(
       datasourceExists,
-      'Exactly one of data-videoid or ' +
-        'data-live-channelid should be present for <amp-youtube> %s',
+      'Exactly one of data-videoid, data-live-channelid or ' +
+        'data-channelid should be present for <amp-youtube> %s',
       this.element
     );
   }
