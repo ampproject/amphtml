@@ -14,10 +14,6 @@ import {Services} from '#service';
 
 import {getData} from '#utils/event-helper';
 import {dev, devAssert, user, userAssert} from '#utils/log';
-import {
-  AttributionReportingStatus,
-  isAttributionReportingAllowed,
-} from '#utils/privacy-sandbox-utils';
 
 import {TransportMode, assertConfig, assertVendor} from './config';
 import {makeClickDelaySpec} from './filters/click-delay';
@@ -93,8 +89,7 @@ export class AmpAdExit extends AMP.BaseElement {
     this.expectedOriginToVendor_ = {};
 
     /** @private @const {boolean} */
-    this.isAttributionReportingSupported_ =
-      this.detectAttributionReportingSupport();
+    this.isAttributionReportingSupported_ = false;
   }
 
   /**
@@ -191,10 +186,8 @@ export class AmpAdExit extends AMP.BaseElement {
   getUrlVariableRewriter_(args, event, target) {
     const substitutionFunctions = {
       'ATTRIBUTION_REPORTING_STATUS': () =>
-        getAttributionReportingStatus(
-          this.isAttributionReportingSupported_,
-          target
-        ),
+        // ARA removed
+        this.isAttributionReportingSupported_,
       'CLICK_X': () => event.clientX,
       'CLICK_Y': () => event.clientY,
     };
@@ -389,17 +382,7 @@ export class AmpAdExit extends AMP.BaseElement {
             .filter(Boolean),
           behaviors: target['behaviors'] || {},
         };
-        if (
-          this.isAttributionReportingSupported_ &&
-          target?.behaviors?.browserAdConversion
-        ) {
-          this.targets_[name]['windowFeatures'] =
-            this.getAttributionReportingValues_(
-              target?.behaviors?.browserAdConversion
-            );
-        } else {
-          this.targets_[name]['trackingUrls'] = target['trackingUrls'] || [];
-        }
+        this.targets_[name]['trackingUrls'] = target['trackingUrls'] || [];
 
         // Build a map of {vendor, origin} for 3p custom variables in the config
         for (const customVar in target['vars']) {
@@ -428,37 +411,6 @@ export class AmpAdExit extends AMP.BaseElement {
     }
 
     this.init3pResponseListener_();
-  }
-
-  /**
-   * Determine if `attribution-reporting` is supported by user-agent. Should only return
-   * true for Chrome 92+.
-   * @visibleForTesting
-   * @return {boolean}
-   */
-  detectAttributionReportingSupport() {
-    return isAttributionReportingAllowed(this.win.document);
-  }
-
-  /**
-   * Extracts the keys from the `browserAdConversion` data creates a
-   * string to be used as the `features` param for the `window.open()` call.
-   * @param {JsonObject} adConversionData
-   * @return {?string}
-   */
-  getAttributionReportingValues_(adConversionData) {
-    if (!adConversionData || !Object.keys(adConversionData)) {
-      return;
-    }
-
-    // `noopener` is probably redundant here but left as defense in depth.
-    // https://groups.google.com/a/chromium.org/g/blink-dev/c/FFX6VkvladY/m/QgaWHK6ZBAAJ
-    const parts = ['noopener'];
-    for (const key of Object.keys(adConversionData)) {
-      const encoded = encodeURIComponent(adConversionData[key]);
-      parts.push(`${key.toLowerCase()}=${encoded}`);
-    }
-    return parts.join(',');
   }
 
   /**
@@ -580,26 +532,3 @@ export class AmpAdExit extends AMP.BaseElement {
 AMP.extension(TAG, '0.1', (AMP) => {
   AMP.registerElement(TAG, AmpAdExit);
 });
-
-/**
- * Resolves the ATTRIBUTION_REPORTING_STATUS macro to the appropriate value
- * based on the given config and browser support.
- * @param {boolean} isAttributionReportingSupported
- * @param {!NavigationTargetDef} target
- * @return {AttributionReportingStatus}
- * @visibleForTesting
- */
-export function getAttributionReportingStatus(
-  isAttributionReportingSupported,
-  target
-) {
-  if (
-    target?.behaviors?.browserAdConversion &&
-    isAttributionReportingSupported
-  ) {
-    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT_AND_POLICY_ENABLED;
-  } else if (target?.behaviors?.browserAdConversion?.attributionsrc) {
-    return AttributionReportingStatus.ATTRIBUTION_DATA_PRESENT;
-  }
-  return AttributionReportingStatus.ATTRIBUTION_MACRO_PRESENT;
-}
