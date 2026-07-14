@@ -31,7 +31,7 @@ const TRUSTED_REFERRER_HOSTS = [
    * Twitter's link wrapper domains:
    * - t.co
    */
-  /^t.co$/,
+  /^t\.co$/,
 ];
 
 /**
