@@ -418,6 +418,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Navegg](../../ads/vendors/navegg.md)
 -   [Nend](../../ads/vendors/nend.md)
 -   [NETLETIX](../../ads/vendors/netletix.md)
+-   [Neuwo](../../ads/vendors/neuwo.md)
 -   [Noddus](../../ads/vendors/noddus.md)
 -   [Nokta](../../ads/vendors/nokta.md)
 -   [Newsroom AI](../../ads/vendors/nws.md)

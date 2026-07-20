@@ -976,6 +976,10 @@ const adConfig = jsonConfiguration({
     renderStartImplemented: true,
   },
 
+  'neuwo': {
+    renderStartImplemented: true,
+  },
+
   'noddus': {
     prefetch: 'https://noddus.com/amp_loader.js',
     renderStartImplemented: true,
