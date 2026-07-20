@@ -20,7 +20,7 @@ export let ValidatedHeadDef;
 // From validator/validator-main.protoascii
 const ALLOWED_FONT_REGEX = new RegExp(
   'https://cdn\\.materialdesignicons\\.com/' +
-    '([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|' +
+    '[0-9]+(?:\\.[0-9]+)*\\.?/css/materialdesignicons\\.min\\.css|' +
     'https://cloud\\.typography\\.com/' +
     '[0-9]*/[0-9]*/css/fonts\\.css|' +
     'https://fast\\.fonts\\.net/.*|' +
@@ -28,8 +28,8 @@ const ALLOWED_FONT_REGEX = new RegExp(
     'https://fonts\\.googleapis\\.com/icon\\?.*|' +
     'https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|' +
     'https://maxcdn\\.bootstrapcdn\\.com/font-awesome/' +
-    '([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|' +
-    'https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+' +
+    '[0-9]+(?:\\.[0-9]+)*\\.?/css/font-awesome\\.min\\.css(\\?.*)?|' +
+    'https://(use|pro)\\.fontawesome\\.com/releases/v[0-9]+(?:\\.[0-9]+)*\\.?' +
     '/css/[0-9a-zA-Z-]+\\.css|' +
     'https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|' +
     'https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css'

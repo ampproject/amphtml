@@ -174,6 +174,41 @@ describes.realWin('head validation', {amp: true}, (env) => {
       );
     });
 
+    it('keeps versioned material-design and font-awesome font links', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.preconnectFor(env.win),
+        'preload'
+      );
+      const urls = [
+        'https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css',
+        'https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',
+        'https://use.fontawesome.com/releases/v5.15.4/css/all.css',
+      ];
+      head.innerHTML = urls
+        .map((href) => `<link href="${href}" rel="stylesheet">`)
+        .join('\n');
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelectorAll('link')).to.have.length(
+        urls.length
+      );
+      urls.forEach((href) =>
+        expect(preloadStub).calledWith(env.ampdoc, href)
+      );
+    });
+
+    it('rejects a font link with a long unterminated version run', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.preconnectFor(env.win),
+        'preload'
+      );
+      const href =
+        'https://use.fontawesome.com/releases/v' + '9'.repeat(40) + '!';
+      head.innerHTML = `<link href="${href}" rel="stylesheet">`;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('link')).not.to.exist;
+      expect(preloadStub).not.to.be.called;
+    });
+
     it('does not allow arbitrary font providers', () => {
       const preloadStub = env.sandbox.stub(
         Services.preconnectFor(env.win),
