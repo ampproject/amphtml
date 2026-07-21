@@ -223,6 +223,10 @@ For example, in this URL: `https://www.youtube.com/watch?v=Z1q71gFeRqM`, `Z1q71g
 
 The Youtube channel id that provides a stable livestream url. For example, in this URL: `https://www.youtube.com/embed/live_stream?channel=UCB8Kb4pxYzsDsHxzBfnid4Q`, `UCB8Kb4pxYzsDsHxzBfnid4Q` is the channel id. You can provide a `data-live-channelid` instead of a `data-videoid` attribute to embed a stable url for a live stream instead of a video. Channels do not come with default placeholders. You can provide a placeholder for the video per example 2 above.
 
+### data-channelid
+
+The YouTube channel id whose uploads playlist should be embedded. For example, in this URL: `https://www.youtube.com/embed?listType=playlist&list=UUUB8Kb4pxYzsDsHxzBfnid4Q`, `UB8Kb4pxYzsDsHxzBfnid4Q` is the channel id (the uploads playlist id is the channel id prefixed with `UU`). You can provide a `data-channelid` instead of a `data-videoid` attribute to embed a channel's uploads instead of a single video. Channels do not come with default placeholders. You can provide a placeholder for the video per example 2 above.
+
 ### data-param-\*
 
 All `data-param-*` attributes (with the exception of `data-param-autoplay` and `data-param-loop`) will be added as query parameter to the YouTube iframe src. This may be used to pass custom values through to YouTube plugins, such as whether to show controls.
