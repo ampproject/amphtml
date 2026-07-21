@@ -1,4 +1,4 @@
-import {toggleAttribute} from '#core/dom';
+import {toggleAttribute, tryFocus} from '#core/dom';
 import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import * as Preact from '#core/dom/jsx';
 import {closest, matches, scopedQuerySelector} from '#core/dom/query';
@@ -660,7 +660,13 @@ export class SystemLayer {
    * @param {boolean} captionsState
    */
   onCaptionsStateUpdate_(captionsState) {
+    const from = captionsState ? NOCAPTIONS_CLASS : CAPTIONS_CLASS;
+    const to = captionsState ? CAPTIONS_CLASS : NOCAPTIONS_CLASS;
+    const restoreFocus = this.activeElementHasClass_(from);
     toggleAttribute(this.systemLayerEl_, 'captions-on', captionsState);
+    if (restoreFocus) {
+      this.focusButton_(to);
+    }
   }
 
   /**
@@ -686,10 +692,16 @@ export class SystemLayer {
    * @private
    */
   onMutedStateUpdate_(isMuted) {
+    const from = isMuted ? MUTE_CLASS : UNMUTE_CLASS;
+    const to = isMuted ? UNMUTE_CLASS : MUTE_CLASS;
+    const restoreFocus = this.activeElementHasClass_(from);
     this.vsync_.mutate(() => {
       isMuted
         ? this.getShadowRoot().setAttribute(AUDIO_MUTED_ATTRIBUTE, '')
         : this.getShadowRoot().removeAttribute(AUDIO_MUTED_ATTRIBUTE);
+      if (restoreFocus) {
+        this.focusButton_(to);
+      }
     });
   }
 
@@ -699,11 +711,45 @@ export class SystemLayer {
    * @private
    */
   onPausedStateUpdate_(isPaused) {
+    const from = isPaused ? PAUSE_CLASS : PLAY_CLASS;
+    const to = isPaused ? PLAY_CLASS : PAUSE_CLASS;
+    const restoreFocus = this.activeElementHasClass_(from);
     this.vsync_.mutate(() => {
       isPaused
         ? this.getShadowRoot().setAttribute(PAUSED_ATTRIBUTE, '')
         : this.getShadowRoot().removeAttribute(PAUSED_ATTRIBUTE);
+      if (restoreFocus) {
+        this.focusButton_(to);
+      }
     });
+  }
+
+  /**
+   * Whether the active element in the system layer's root has the given class.
+   * @param {string} className
+   * @return {boolean}
+   * @private
+   */
+  activeElementHasClass_(className) {
+    const root = this.systemLayerEl_.getRootNode();
+    const active = root && root.activeElement;
+    return (
+      !!active && !!active.classList && active.classList.contains(className)
+    );
+  }
+
+  /**
+   * Focuses the first descendant button with the given class.
+   * @param {string} className
+   * @private
+   */
+  focusButton_(className) {
+    const target = this.systemLayerEl_.querySelector(
+      `.${escapeCssSelectorIdent(className)}`
+    );
+    if (target) {
+      tryFocus(target);
+    }
   }
 
   /**
