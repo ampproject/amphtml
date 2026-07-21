@@ -141,6 +141,7 @@ exports.rules = [
       // a4a ads depend on a4a.
       'extensions/amp-ad-network-nws-impl/0.1/amp-ad-network-nws-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-fake-impl/0.1/amp-ad-network-fake-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
+      'extensions/amp-ad-network-insurads-impl/0.1/amp-ad-network-insurads-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-smartads-impl/0.1/amp-ad-network-smartads-impl.js->extensions/amp-a4a/0.1/amp-a4a.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/sra-utils.js->extensions/amp-a4a/0.1/amp-a4a.js',
@@ -162,6 +163,9 @@ exports.rules = [
       'extensions/amp-ad-network-adzerk-impl/0.1/amp-ad-network-adzerk-impl.js->extensions/amp-a4a/0.1/amp-ad-utils.js',
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
       'extensions/amp-ad-network-valueimpression-impl/0.1/amp-ad-network-valueimpression-impl.js->extensions/amp-a4a/0.1/refresh-manager.js',
+
+      // Depends on DoubleClick
+      'extensions/amp-ad-network-insurads-impl/0.1/doubleclick-helper.js->extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
 
       // AMP access depends on AMP access
       'extensions/amp-access-scroll/0.1/scroll-impl.js->extensions/amp-access/0.1/amp-access-client.js',
@@ -535,6 +539,10 @@ exports.rules = [
     mustNotDependOn: [
       'extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
       'extensions/amp-ad-network-adsense-impl/0.1/amp-ad-network-adsense-impl.js',
+    ],
+    allowlist: [
+      // Depends on DoubleClick
+      'extensions/amp-ad-network-insurads-impl/0.1/doubleclick-helper.js->extensions/amp-ad-network-doubleclick-impl/0.1/amp-ad-network-doubleclick-impl.js',
     ],
   },
 

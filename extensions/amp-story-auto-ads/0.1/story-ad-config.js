@@ -21,6 +21,7 @@ const AllowedAdTypes = {
   'adsense': true,
   'custom': true,
   'doubleclick': true,
+  'insurads': true,
   'fake': true,
   'nws': true,
   'mgid': true,
