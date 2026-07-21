@@ -1,3 +1,4 @@
+import {escapeHtml} from '#core/dom';
 import {isElement, isString} from '#core/types';
 
 /** @type {Array<string>} */
@@ -70,7 +71,7 @@ function appendToResult(rootNode, attrs, result) {
     if (isString(node)) {
       result.push(node);
     } else if (node.nodeType === Node.TEXT_NODE) {
-      result.push(node.textContent ?? '');
+      result.push(escapeHtml(node.textContent ?? ''));
     } else if (isElement(node) && isApplicableNode(node)) {
       appendOpenTag(node, allowedAttrs, result);
       stack.push(`</${node.tagName.toLowerCase()}>`);
@@ -108,7 +109,7 @@ function appendOpenTag(node, attrs, result) {
 
   attrs.forEach((attr) => {
     if (node.hasAttribute(attr)) {
-      result.push(` ${attr}="${node.getAttribute(attr)}"`);
+      result.push(` ${attr}="${escapeHtml(node.getAttribute(attr))}"`);
     }
   });
 
