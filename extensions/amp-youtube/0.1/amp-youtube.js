@@ -35,8 +35,6 @@ import {VideoEvents_Enum} from '../../../src/video-interface';
 
 const TAG = 'amp-youtube';
 
-// Correct PlayerStates taken from
-// https://developers.google.com/youtube/iframe_api_reference#Playback_status
 /**
  * @enum {number}
  * @private
@@ -53,7 +51,6 @@ const PlayerStates = {
  * @private
  */
 const PlayerFlags = {
-  // Config to tell YouTube to hide annotations by default
   HIDE_ANNOTATION: 3,
 };
 
@@ -63,25 +60,28 @@ class AmpYoutube extends AMP.BaseElement {
   constructor(element) {
     super(element);
 
-    /** @private {?string}  */
+    /** @private {?string} */
     this.videoid_ = null;
 
     /** @private {?string} */
     this.liveChannelid_ = null;
 
-    /** @private {?boolean}  */
+    /** @private {?string} */
+    this.channelid_ = null;
+
+    /** @private {?boolean} */
     this.muted_ = false;
 
-    /** @private {?boolean}  */
+    /** @private {?boolean} */
     this.isLoop_ = false;
 
-    /** @private {?boolean}  */
+    /** @private {?boolean} */
     this.isPlaylist_ = false;
 
     /** @private {?Element} */
     this.iframe_ = null;
 
-    /** @private {?Object} Info object about video returned by YouTube API*/
+    /** @private {?Object} */
     this.info_ = null;
 
     /** @private {?string} */
@@ -108,14 +108,9 @@ class AmpYoutube extends AMP.BaseElement {
    * @override
    */
   preconnectCallback(opt_onLayout) {
-    // NOTE: When preload `as=document` is natively supported in browsers
-    // we can switch to preloading the full source. For now this doesn't
-    // work, because we preload with a different type and in that case
-    // responses are only picked up if they are cacheable.
     const preconnect = Services.preconnectFor(this.win);
     const ampdoc = this.getAmpDoc();
     preconnect.url(ampdoc, this.getVideoIframeSrc_());
-    // Load high resolution placeholder images for videos in prerender mode.
     preconnect.url(ampdoc, 'https://i.ytimg.com', opt_onLayout);
   }
 
@@ -126,10 +121,6 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   renderOutsideViewport() {
-    // We are conservative about loading YT videos outside the viewport,
-    // because the player is pretty heavy.
-    // This will still start loading before they become visible, but it
-    // won't typically load a large number of embeds.
     return 0.75;
   }
 
@@ -137,6 +128,7 @@ class AmpYoutube extends AMP.BaseElement {
   buildCallback() {
     this.videoid_ = this.getVideoId_();
     this.liveChannelid_ = this.getLiveChannelId_();
+    this.channelid_ = this.getChannelId_();
     this.assertDatasourceExists_();
 
     const deferred = new Deferred();
@@ -154,9 +146,14 @@ class AmpYoutube extends AMP.BaseElement {
     this.assertDatasourceExists_();
     const urlSuffix = this.getCredentials_() === 'omit' ? '-nocookie' : '';
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
-    const descriptor = this.videoid_
-      ? `${encodeURIComponent(this.videoid_ || '')}?`
-      : `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`;
+
+    let descriptor;
+    if (this.videoid_) {
+      descriptor = `${encodeURIComponent(this.videoid_)}?`;
+    } else {
+      const channel = this.liveChannelid_ || this.channelid_ || '';
+      descriptor = `live_stream?channel=${encodeURIComponent(channel)}&`;
+    }
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
@@ -174,7 +171,6 @@ class AmpYoutube extends AMP.BaseElement {
     const {element} = this;
     const params = getDataParamsFromAttributes(element);
     if ('autoplay' in params) {
-      // Autoplay is managed by video manager, do not pass it to YouTube.
       delete params['autoplay'];
       this.user().error(
         'AMP-YOUTUBE',
@@ -182,48 +178,33 @@ class AmpYoutube extends AMP.BaseElement {
       );
     }
 
-    // Unless inline play policy is set explicitly, enable inline play for iOS
-    // in all cases similar to Android. Inline play is the desired default for
-    // video in AMP.
     if (!('playsinline' in params)) {
       params['playsinline'] = '1';
     }
 
     const hasAutoplay = element.hasAttribute('autoplay');
     if (hasAutoplay) {
-      // Unless annotations policy is set explicitly, change the default to
-      // hide annotations when autoplay is set.
-      // We do this because we like the first user interaction with an
-      // autoplaying video to be just unmute tso annotations are not
-      // interactive during autoplay anyway.
       if (!('iv_load_policy' in params)) {
         params['iv_load_policy'] = `${PlayerFlags.HIDE_ANNOTATION}`;
       }
-
-      // Inline play must be set for autoplay regardless of original value.
       params['playsinline'] = '1';
     }
 
     if ('loop' in params) {
-      // Loop is managed by the amp-youtube extension, prefer loop param instead
       this.user().warn(
         'AMP-YOUTUBE',
         'Use loop attribute instead of the deprecated data-param-loop'
       );
     }
 
-    // In the case of a playlist, looping is delegated to the Youtube player
-    // instead of AMP manually looping the video through the Youtube API
     this.isLoop_ =
       element.hasAttribute('loop') ||
       ('loop' in params && params['loop'] == '1');
     this.isPlaylist_ = 'playlist' in params;
     if (this.isLoop_) {
       if (this.isPlaylist_) {
-        // Use native looping for playlists
         params['loop'] = '1';
       } else if ('loop' in params) {
-        // Use js-based looping for single videos
         delete params['loop'];
       }
     }
@@ -234,18 +215,14 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    // See https://developers.google.com/youtube/iframe_api_reference
     const iframe = createFrameFor(this, this.getVideoIframeSrc_());
     iframe.title = this.element.title || 'YouTube video';
 
-    // This is temporary until M74 launches.
-    // TODO(aghassemi, #21247)
+    // Temporary until M74 launch (legacy)
     addUnsafeAllowAutoplay(iframe);
 
     this.iframe_ = iframe;
 
-    // Listening for VideoEvents_Enum.LOAD in AutoFullscreenManager.register may
-    // introduce race conditions which may break elements e.g. amp-ima-video
     Services.videoManagerForDoc(this.element).register(this);
 
     this.unlistenMessage_ = listen(
@@ -258,21 +235,13 @@ class AmpYoutube extends AMP.BaseElement {
       this.unlistenLooping_ = listen(
         this.element,
         VideoEvents_Enum.ENDED,
-        (unusedEvent) => this.play(false /** unusedIsAutoplay */)
+        (unusedEvent) => this.play(false /* unusedIsAutoplay */)
       );
     }
 
     const loaded = this.loadPromise(this.iframe_)
-      // Make sure the YT player is ready for this. For some reason YT player
-      // would send couple of messages but then stop. Waiting for a bit before
-      // sending the 'listening' event seems to fix that and allow YT Player
-      // to send messages continuously.
-      //
-      // This was removed in #6915 but due to #17979 it has been taken back
-      // for a workaround.
       .then(() => Services.timerFor(this.win).promise(300))
       .then(() => {
-        // Tell YT that we want to receive messages
         this.listenToFrame_();
         dispatchCustomEvent(this.element, VideoEvents_Enum.LOAD);
       });
@@ -313,14 +282,27 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   mutatedAttributesCallback(mutations) {
-    if (mutations['data-videoid'] == null) {
+    const videoChanged = mutations['data-videoid'] != null;
+    const liveChannelChanged = mutations['data-live-channelid'] != null;
+    const channelChanged = mutations['data-channelid'] != null;
+    if (!videoChanged && !liveChannelChanged && !channelChanged) {
       return;
     }
+
     this.videoid_ = this.getVideoId_();
+    this.liveChannelid_ = this.getLiveChannelId_();
+    this.channelid_ = this.getChannelId_();
+
     if (!this.iframe_) {
       return;
     }
-    this.sendCommand_('loadVideoById', [this.videoid_]);
+
+    if (this.videoid_ && !liveChannelChanged && !channelChanged) {
+      this.sendCommand_('loadVideoById', [this.videoid_]);
+    } else {
+      this.videoIframeSrc_ = null;
+      this.iframe_.src = this.getVideoIframeSrc_();
+    }
   }
 
   /**
@@ -329,6 +311,14 @@ class AmpYoutube extends AMP.BaseElement {
    */
   getLiveChannelId_() {
     return this.element.getAttribute('data-live-channelid');
+  }
+
+  /**
+   * @return {?string}
+   * @private
+   */
+  getChannelId_() {
+    return this.element.getAttribute('data-channelid');
   }
 
   /**
@@ -351,13 +341,12 @@ class AmpYoutube extends AMP.BaseElement {
    * @private
    */
   assertDatasourceExists_() {
-    const datasourceExists =
-      !(this.videoid_ && this.liveChannelid_) &&
-      (this.videoid_ || this.liveChannelid_);
+    const sources = [this.videoid_, this.liveChannelid_, this.channelid_];
+    const present = sources.filter(Boolean).length;
+    const datasourceExists = present === 1;
     userAssert(
       datasourceExists,
-      'Exactly one of data-videoid or ' +
-        'data-live-channelid should be present for <amp-youtube> %s',
+      'Exactly one of data-videoid, data-live-channelid, or data-channelid should be present for <amp-youtube> %s',
       this.element
     );
   }
@@ -372,11 +361,11 @@ class AmpYoutube extends AMP.BaseElement {
     this.playerReadyPromise_.then(() => {
       if (this.iframe_ && this.iframe_.contentWindow) {
         const message = JSON.stringify({
-          'event': 'command',
-          'func': command,
-          'args': opt_args || '',
+          event: 'command',
+          func: command,
+          args: opt_args || '',
         });
-        this.iframe_.contentWindow./*OK*/ postMessage(message, '*');
+        this.iframe_.contentWindow.postMessage(message, '*');
       }
     });
   }
@@ -396,7 +385,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     const data = objOrParseJson(eventData);
     if (data == null) {
-      return; // We only process valid JSON.
+      return; // Only process valid JSON.
     }
 
     const eventType = data['event'];
@@ -419,7 +408,6 @@ class AmpYoutube extends AMP.BaseElement {
       redispatch(element, playerState.toString(), {
         [PlayerStates.PLAYING]: VideoEvents_Enum.PLAYING,
         [PlayerStates.PAUSED]: VideoEvents_Enum.PAUSE,
-        // YT does not fire pause and ended together.
         [PlayerStates.ENDED]: [VideoEvents_Enum.ENDED, VideoEvents_Enum.PAUSE],
       });
       return;
@@ -455,9 +443,9 @@ class AmpYoutube extends AMP.BaseElement {
     if (!this.iframe_) {
       return;
     }
-    this.iframe_.contentWindow./*OK*/ postMessage(
+    this.iframe_.contentWindow.postMessage(
       JSON.stringify({
-        'event': 'listening',
+        event: 'listening',
       }),
       '*'
     );
@@ -474,16 +462,10 @@ class AmpYoutube extends AMP.BaseElement {
     const videoid = dev().assertString(this.videoid_);
 
     setStyles(imgPlaceholder, {
-      // Cover matches YouTube Player styling.
       'object-fit': 'cover',
-      // Hiding the placeholder initially to give the browser time to fix
-      // the object-fit: cover.
       'visibility': 'hidden',
     });
     propagateAttributes(['aria-label'], this.element, imgPlaceholder);
-    // TODO(mkhatib): Maybe add srcset to allow the browser to
-    // load the needed size or even better match YTPlayer logic for loading
-    // player thumbnails for different screen sizes for a cache win!
     imgPlaceholder.src = `https://i.ytimg.com/vi/${encodeURIComponent(
       videoid
     )}/sddefault.jpg#404_is_fine`;
@@ -498,14 +480,8 @@ class AmpYoutube extends AMP.BaseElement {
     }
     applyFillContent(imgPlaceholder);
 
-    // Because sddefault.jpg isn't available for all videos, we try to load
-    // it and fallback to hqdefault.jpg.
     this.loadPromise(imgPlaceholder)
       .then(() => {
-        // A pretty ugly hack since onerror won't fire on YouTube image 404.
-        // This might be due to the fact that YouTube returns data to the request
-        // even when the status is 404. YouTube returns a placeholder image that
-        // is 120x90.
         if (
           imgPlaceholder.naturalWidth == 120 &&
           imgPlaceholder.naturalHeight == 90
@@ -522,7 +498,7 @@ class AmpYoutube extends AMP.BaseElement {
       .then(() => {
         this.getVsync().mutate(() => {
           setStyles(imgPlaceholder, {
-            'visibility': '',
+            visibility: '',
           });
         });
       });
@@ -530,7 +506,7 @@ class AmpYoutube extends AMP.BaseElement {
     return imgPlaceholder;
   }
 
-  // VideoInterface Implementation. See ../src/video-interface.VideoInterface
+  // VideoInterface Implementation.
 
   /** @override */
   supportsPlatform() {
@@ -539,9 +515,6 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   isInteractive() {
-    // YouTube videos are always interactive. There is no YouTube param that
-    // makes the video non-interactive. Even data-param-control=0 will not
-    // prevent user from pausing or resuming the video.
     return true;
   }
 
@@ -566,14 +539,10 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
-  showControls() {
-    // Not supported.
-  }
+  showControls() {}
 
   /** @override */
-  hideControls() {
-    // Not supported.
-  }
+  hideControls() {}
 
   /** @override */
   fullscreenEnter() {
@@ -606,8 +575,6 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   preimplementsMediaSessionAPI() {
-    // Youtube already updates the Media Session so no need for the video
-    // manager to update it too
     return true;
   }
 
@@ -629,13 +596,11 @@ class AmpYoutube extends AMP.BaseElement {
     if (this.info_) {
       return this.info_.duration;
     }
-    // Not supported.
     return NaN;
   }
 
   /** @override */
   getPlayedRanges() {
-    // Not supported.
     return [];
   }
 
