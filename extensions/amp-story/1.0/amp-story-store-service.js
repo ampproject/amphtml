@@ -247,6 +247,7 @@ const Action = mangleObjectValues({
   TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK: 'togglePageHasElementWithPlayblack',
   TOGGLE_PAUSED: 'togglePaused',
   TOGGLE_RTL: 'toggleRtl',
+  TOGGLE_SHARE_BUTTON: 'toggleShareButton',
   TOGGLE_SHARE_MENU: 'toggleShareMenu',
   TOGGLE_STORY_HAS_BACKGROUND_AUDIO: 'toggleStoryHasBackgroundAudio',
   TOGGLE_STORY_HAS_PLAYBACK_UI: 'toggleStoryHasPlaybackUi',
@@ -419,6 +420,11 @@ const actions = (state, action, data) => {
       return /** @type {!State} */ ({
         ...state,
         [StateProperty.KEYBOARD_ACTIVE_STATE]: !!data,
+      });
+    case Action.TOGGLE_SHARE_BUTTON:
+      return /** @type {!State} */ ({
+        ...state,
+        [StateProperty.CAN_SHOW_SHARING_UIS]: !!data,
       });
     case Action.TOGGLE_SHARE_MENU:
       return /** @type {!State} */ ({
