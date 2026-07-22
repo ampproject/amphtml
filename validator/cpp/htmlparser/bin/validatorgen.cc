@@ -15,6 +15,7 @@
 //
 
 #include <iostream>
+#include <string>
 
 #include "glog/logging.h"
 #include "absl/flags/flag.h"

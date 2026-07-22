@@ -133,9 +133,11 @@ RenderError RenderElementNode(Node* node, bool is_closing_tag,
     }
   }
 
-  // Render any child nodes.
-  if (std::find(kRawTextNodes.begin(), kRawTextNodes.end(), node->DataAtom()) !=
-      kRawTextNodes.end()) {
+  // Render any child nodes. Only in HTML namespace, certain nodes are rendered
+  // as raw text.
+  if (node->NameSpace().empty() &&
+      std::find(kRawTextNodes.begin(), kRawTextNodes.end(), node->DataAtom()) !=
+          kRawTextNodes.end()) {
     for (Node* c = node->LastChild(); c != nullptr; c = c->PrevSibling()) {
       if (c->Type() == NodeType::TEXT_NODE) {
         render_tasks->PushRenderRawTextNode(c);

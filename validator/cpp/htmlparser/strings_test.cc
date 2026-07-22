@@ -1,10 +1,13 @@
 #include "cpp/htmlparser/strings.h"
 
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <vector>
 
 #include "gtest/gtest.h"
 
-using namespace std::string_literals;
+using namespace std::string_literals;  // NOLINT(build/namespaces)
 
 TEST(StringsTest, SplitStringAtTest) {
   auto columns = htmlparser::Strings::SplitStringAt("a|b|c", '|');
@@ -325,6 +328,21 @@ TEST(StringsTest, EscapeUnescapeTest) {
   EXPECT_EQ(str8, "#");
 }
 
+TEST(StringsTest, UnescapeSingleDigitDecimalCodeTest) {
+  std::string str = "&#2";
+  htmlparser::Strings::UnescapeString(&str);
+  EXPECT_EQ(str, "\u0002");
+}
+
+TEST(StringsTest, UnescapeNoDigitsHexCodeTest) {
+  std::string lowercase_str = "&#x";
+  std::string uppercase_str = "&#X";
+  htmlparser::Strings::UnescapeString(&lowercase_str);
+  htmlparser::Strings::UnescapeString(&uppercase_str);
+  EXPECT_EQ(lowercase_str, "&#x");
+  EXPECT_EQ(uppercase_str, "&#X");
+}
+
 TEST(StringsTest, EncodingTest) {
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(224).value(), "à");
   EXPECT_EQ(htmlparser::Strings::EncodeUtf8Symbol(202).value(), "Ê");
@@ -410,7 +428,7 @@ TEST(StringsTest, ReplaceTest) {
   htmlparser::Strings::ReplaceAny(&whitespace_and_null2,
                                   htmlparser::Strings::kNullChar,
                                   htmlparser::Strings::kNullReplacementChar);
-  EXPECT_EQ(whitespace_and_null2, "amaltas is ��good �boy");
+  EXPECT_EQ(whitespace_and_null2, "amaltas is ��good �boy");  // NOLINT
 
   std::string many_whitespaces = "  a   m  a lta s  ";
   htmlparser::Strings::RemoveExtraSpaceChars(&many_whitespaces);

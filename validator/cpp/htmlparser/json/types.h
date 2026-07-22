@@ -74,12 +74,14 @@
 #ifndef CPP_HTMLPARSER_JSON_TYPES_H_
 #define CPP_HTMLPARSER_JSON_TYPES_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <functional>
-#include <map>
 #include <memory>
-#include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -92,18 +94,15 @@ class JsonObject;
 
 class JsonDict {
  public:
-  template <typename V>
-  void Insert(std::string_view key, V&& value) {
-    items_.emplace_back(std::make_pair(key, std::forward<V>(value)));
-  }
+  using iterator = std::vector<std::pair<std::string, JsonObject>>::iterator;
+  using const_iterator =
+      std::vector<std::pair<std::string, JsonObject>>::const_iterator;
 
   template <typename V>
-  void Insert(std::string_view key, const V& value) {
-    items_.emplace_back(std::make_pair(key, value));
-  }
+  void Insert(std::string_view key, V&& value);
 
   std::size_t size() const;
-  bool empty() const { return items_.empty(); }
+  bool empty() const;
 
   std::string ToString() const;
   void ToString(std::stringbuf* buf) const;
@@ -118,11 +117,11 @@ class JsonDict {
   // }
   // This only works with auto syntax. Following wont' compile:
   // JsonDict::const_iterator = mydict.begin();
-  auto begin() { return items_.begin(); }
-  auto end() { return items_.end(); }
-  // const_iterator.
-  auto begin() const { return items_.begin(); }
-  auto end() const { return items_.end(); }
+  iterator begin();
+  const_iterator begin() const;
+
+  iterator end();
+  const_iterator end() const;
 
  private:
   std::vector<std::pair<std::string, JsonObject>> items_;
@@ -130,32 +129,21 @@ class JsonDict {
 
 class JsonArray {
  public:
-  template <typename T>
-  void Append(T&& i) {
-    items_.emplace_back(i);
-  }
+  using iterator = std::vector<JsonObject>::iterator;
+  using const_iterator = std::vector<JsonObject>::const_iterator;
 
   template <typename T>
-  void Append(T& i) {
-    items_.emplace_back(i);
-  }
+  void Append(T&& i);
 
   // Facilitates appending multiple items.
   // my_array.Append(1, 2, 3, 4, "hello", "world", true, true, false);
   // my_array contains:
   // [1, 2, 3, 4, "hello", "world", true, true, false];
   template <typename... Ts>
-  void Append(Ts&&... items) {
-    auto unused = {0, (items_.emplace_back(std::forward<Ts>(items)), 0)...};
-  }
-
-  template <typename... Ts>
-  void Append(const Ts&... items) {
-    auto unused = {0, (items_.emplace_back(items), 0)...};
-  }
+  void Append(Ts&&... items);
 
   std::size_t size() const;
-  bool empty() const { return items_.empty(); }
+  bool empty() const;
 
   std::string ToString() const;
   void ToString(std::stringbuf*) const;
@@ -164,11 +152,11 @@ class JsonArray {
   // for (const auto& item : my_json_array) {
   //   std::cout << item.ToString() << std::endl;
   // }
-  auto begin() { return items_.begin(); }
-  auto end() { return items_.end(); }
-  // const_iterator.
-  auto begin() const { return items_.begin(); }
-  auto end() const { return items_.end(); }
+  iterator begin();
+  iterator end();
+
+  const_iterator begin() const;
+  const_iterator end() const;
 
   JsonObject& at(std::size_t i);
   JsonObject* Last();
@@ -248,8 +236,8 @@ class JsonObject {
   explicit JsonObject(const std::string_view& sv) : v_(sv) {}
   explicit JsonObject(bool b) : v_(b) {}
   explicit JsonObject(std::nullptr_t n) : v_(JsonNull()) {}
-  explicit JsonObject(JsonArray& a) : v_(a) {}
-  explicit JsonObject(JsonDict& d) : v_(d) {}
+  explicit JsonObject(const JsonArray& a) : v_(a) {}
+  explicit JsonObject(const JsonDict& d) : v_(d) {}
   explicit JsonObject(JsonArray&& a) : v_(std::move(a)) {}
   explicit JsonObject(JsonDict&& d) : v_(std::move(d)) {}
   explicit JsonObject(Any<JsonArray> a) : v_(a) {}
@@ -315,17 +303,6 @@ class JsonObject {
       v_;
 };
 
-inline std::size_t JsonDict::size() const { return items_.size(); }
-
-inline std::size_t JsonArray::size() const { return items_.size(); }
-
-inline JsonObject& JsonArray::at(std::size_t i) { return items_[i]; }
-
-inline JsonObject* JsonArray::Last() {
-  if (items_.empty()) return nullptr;
-  return &items_.back();
-}
-
 template <typename T>
 T* JsonDict::Get(std::string_view key) {
   for (auto iter = items_.rbegin(); iter != items_.rend(); ++iter) {
@@ -334,6 +311,21 @@ T* JsonDict::Get(std::string_view key) {
     }
   }
   return nullptr;
+}
+
+template <typename V>
+void JsonDict::Insert(std::string_view key, V&& value) {
+  items_.emplace_back(key, JsonObject(std::forward<V>(value)));
+}
+
+template <typename T>
+void JsonArray::Append(T&& i) {
+  items_.emplace_back(std::forward<T>(i));
+}
+
+template <typename... Ts>
+void JsonArray::Append(Ts&&... items) {
+  (items_.emplace_back(std::forward<Ts>(items)), ...);
 }
 
 }  // namespace htmlparser::json
