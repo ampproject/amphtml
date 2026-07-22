@@ -57,8 +57,8 @@ const SANDBOX_MIN_LIST = ['allow-top-navigation'];
 /** @enum {number} */
 const SWIPING_STATE_ENUM = {
   NOT_SWIPING: 0,
-  SWIPING_TO_LEFT: 1,
-  SWIPING_TO_RIGHT: 2,
+  SWIPING_TO_UP: 1,
+  SWIPING_TO_DOWN: 2,
 };
 
 /** @const {number} */
@@ -228,8 +228,8 @@ export class AmpStoryPlayer {
     this.touchEventState_ = {
       startX: 0,
       startY: 0,
-      lastX: 0,
-      isSwipeX: null,
+      lastY: 0,
+      isSwipeY: null,
     };
 
     /** @private {?Deferred} */
@@ -1408,7 +1408,7 @@ export class AmpStoryPlayer {
       'origin': this.win_.origin,
       'showStoryUrlInfo': '0',
       'storyPlayer': 'v0',
-      'cap': 'swipe',
+      'cap': 'swipe-y',
     };
 
     if (this.attribution_ === 'auto') {
@@ -1815,30 +1815,30 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(this.win_, 'amp-story-player-touchmove', {
         'touches': event.touches,
-        'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+        'isNavigationalSwipe': this.touchEventState_.isSwipeY,
       })
     );
 
-    if (this.touchEventState_.isSwipeX === false) {
+    if (this.touchEventState_.isSwipeY === false) {
       this.pageScroller_ &&
         this.pageScroller_.onTouchMove(event.timeStamp, coordinates.clientY);
       return;
     }
 
     const {screenX, screenY} = coordinates;
-    this.touchEventState_.lastX = screenX;
+    this.touchEventState_.lastY = screenY;
 
-    if (this.touchEventState_.isSwipeX === null) {
-      this.touchEventState_.isSwipeX =
-        Math.abs(this.touchEventState_.startX - screenX) >
-        Math.abs(this.touchEventState_.startY - screenY);
-      if (!this.touchEventState_.isSwipeX) {
+    if (this.touchEventState_.isSwipeY === null) {
+      this.touchEventState_.isSwipeY =
+        Math.abs(this.touchEventState_.startY - screenY) >
+        Math.abs(this.touchEventState_.startX - screenX);
+      if (!this.touchEventState_.isSwipeY) {
         return;
       }
     }
 
-    this.onSwipeX_({
-      deltaX: screenX - this.touchEventState_.startX,
+    this.onSwipeY_({
+      deltaY: screenY - this.touchEventState_.startY,
       last: false,
     });
   }
@@ -1852,13 +1852,13 @@ export class AmpStoryPlayer {
     this.element_.dispatchEvent(
       createCustomEvent(this.win_, 'amp-story-player-touchend', {
         'touches': event.touches,
-        'isNavigationalSwipe': this.touchEventState_.isSwipeX,
+        'isNavigationalSwipe': this.touchEventState_.isSwipeY,
       })
     );
 
-    if (this.touchEventState_.isSwipeX === true) {
-      this.onSwipeX_({
-        deltaX: this.touchEventState_.lastX - this.touchEventState_.startX,
+    if (this.touchEventState_.isSwipeY === true) {
+      this.onSwipeY_({
+        deltaY: this.touchEventState_.lastY - this.touchEventState_.startY,
         last: true,
       });
     } else {
@@ -1867,33 +1867,33 @@ export class AmpStoryPlayer {
 
     this.touchEventState_.startX = 0;
     this.touchEventState_.startY = 0;
-    this.touchEventState_.lastX = 0;
-    this.touchEventState_.isSwipeX = null;
+    this.touchEventState_.lastY = 0;
+    this.touchEventState_.isSwipeY = null;
     this.swipingState_ = SWIPING_STATE_ENUM.NOT_SWIPING;
   }
 
   /**
-   * Reacts to horizontal swipe events.
+   * Reacts to vertical swipe events.
    * @param {!Object} gesture
    */
-  onSwipeX_(gesture) {
+  onSwipeY_(gesture) {
     if (this.stories_.length <= 1 || this.pageAttachmentOpen_) {
       return;
     }
 
-    const {deltaX} = gesture;
+    const {deltaY} = gesture;
 
     if (gesture.last === true) {
-      const delta = Math.abs(deltaX);
+      const delta = Math.abs(deltaY);
 
-      if (this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_LEFT) {
+      if (this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_UP) {
         delta > TOGGLE_THRESHOLD_PX &&
         (this.getSecondaryStory_() || this.isCircularWrappingEnabled_)
           ? this.next_()
           : this.resetStoryStyles_();
       }
 
-      if (this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_RIGHT) {
+      if (this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_DOWN) {
         delta > TOGGLE_THRESHOLD_PX &&
         (this.getSecondaryStory_() || this.isCircularWrappingEnabled_)
           ? this.previous_()
@@ -1903,7 +1903,7 @@ export class AmpStoryPlayer {
       return;
     }
 
-    this.drag_(deltaX);
+    this.drag_(deltaY);
   }
 
   /**
@@ -1935,7 +1935,7 @@ export class AmpStoryPlayer {
    */
   getSecondaryStory_() {
     const nextStoryIdx =
-      this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_LEFT
+      this.swipingState_ === SWIPING_STATE_ENUM.SWIPING_TO_UP
         ? this.currentIdx_ + 1
         : this.currentIdx_ - 1;
 
@@ -2023,23 +2023,23 @@ export class AmpStoryPlayer {
 
   /**
    * Drags stories following the swiping gesture.
-   * @param {number} deltaX
+   * @param {number} deltaY
    * @private
    */
-  drag_(deltaX) {
+  drag_(deltaY) {
     let secondaryTranslate;
 
-    if (deltaX < 0) {
-      this.swipingState_ = SWIPING_STATE_ENUM.SWIPING_TO_LEFT;
-      secondaryTranslate = `translate3d(calc(100% + ${deltaX}px), 0, 0)`;
+    if (deltaY < 0) {
+      this.swipingState_ = SWIPING_STATE_ENUM.SWIPING_TO_UP;
+      secondaryTranslate = `translate3d(0, calc(100% + ${deltaY}px), 0)`;
     } else {
-      this.swipingState_ = SWIPING_STATE_ENUM.SWIPING_TO_RIGHT;
-      secondaryTranslate = `translate3d(calc(${deltaX}px - 100%), 0, 0)`;
+      this.swipingState_ = SWIPING_STATE_ENUM.SWIPING_TO_DOWN;
+      secondaryTranslate = `translate3d(0, calc(${deltaY}px - 100%), 0)`;
     }
 
     const story = this.stories_[this.currentIdx_];
     const {iframe} = story;
-    const translate = `translate3d(${deltaX}px, 0, 0)`;
+    const translate = `translate3d(0, ${deltaY}px, 0)`;
 
     requestAnimationFrame(() => {
       setStyles(devAssertElement(iframe), {
