@@ -1,4 +1,4 @@
-# AMP Module Build
+docs/amp-module-build.md# AMP Module Build
 
 ## Explainer
 
