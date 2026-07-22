@@ -5,6 +5,20 @@
   top: 67.5% !important;
 }
 
+/* Scale CTA container for high-resolution displays (4K) */
+@media screen and (min-width: 2560px) {
+  .i-amphtml-cta-container {
+    /* Increase the size of the container to accommodate larger CTA button */
+    bottom: 0 !important;
+    height: 120px !important;
+  }
+
+  .i-amphtml-story-desktop-fullbleed .i-amphtml-cta-container {
+    bottom: 12.5vh !important;
+    height: auto !important;
+  }
+}
+
 .i-amphtml-glass-pane {
   height: 100% !important;
   width: 100% !important;
