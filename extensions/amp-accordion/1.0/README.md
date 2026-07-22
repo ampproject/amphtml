@@ -449,7 +449,7 @@ Allow only one section to expand at a time by applying the `expand-single-sectio
   <section>
     <h2>Section 3</h2>
     <img
-      src="https://source.unsplash.com/random/320x256"
+      src="https://picsum.photos/320/256"
       width="320"
       height="256"
     />
