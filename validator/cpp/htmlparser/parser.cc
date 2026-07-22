@@ -1,9 +1,16 @@
 #include <algorithm>
-#include <set>
-#include <tuple>
+#include <functional>
 #ifdef DUMP_NODES
 #include <iostream>  // For DumpDocument
 #endif               // DUMP_NODES
+#include <iterator>
+#include <memory>
+#include <optional>
+#include <set>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include "absl/flags/flag.h"
 #include "absl/status/status.h"
@@ -462,7 +469,7 @@ void Parser::AddFormattingElement() {
     Node* node = active_formatting_elements_stack_.at(i);
     if (node->node_type_ == NodeType::SCOPE_MARKER_NODE) break;
     if (node->node_type_ != NodeType::ELEMENT_NODE) continue;
-    if (node->name_space_ != "") continue;
+    if (!node->name_space_.empty()) continue;
     if (node->atom_ != tag_atom) continue;
     if (node->attributes_.size() != token_.attributes.size()) continue;
 
@@ -1703,7 +1710,7 @@ bool Parser::InBodyIM() {  // NOLINT
       break;
     }
     case TokenType::ERROR_TOKEN: {
-      if (template_stack_.size() > 0) {
+      if (!template_stack_.empty()) {
         insertion_mode_ = std::bind(&Parser::InTemplateIM, this);
         return false;
       } else {
