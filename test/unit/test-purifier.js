@@ -592,6 +592,14 @@ describes.sandboxed('DOMPurify-based', {}, (env) => {
         });
       });
 
+      it('should ignore styles containing spaced `! important`', () => {
+        allowConsoleError(() => {
+          expect(
+            purify('<div style="color:blue ! important">Test</div>')
+          ).to.equal('<div>Test</div>');
+        });
+      });
+
       it('should ignore styles containing `position:fixed`', () => {
         allowConsoleError(() => {
           expect(purify('<div style="position:fixed">Test</div>')).to.equal(

@@ -348,7 +348,7 @@ const EMAIL_DENYLISTED_TAG_SPECIFIC_ATTRS = Object.freeze({
  * @const {!RegExp}
  */
 const INVALID_INLINE_STYLE_REGEX =
-  /!important|position\s*:\s*fixed|position\s*:\s*sticky/i;
+  /!\s*important|position\s*:\s*fixed|position\s*:\s*sticky/i;
 
 /**
  * Whether the attribute/value is valid.
