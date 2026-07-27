@@ -58,11 +58,17 @@ export function taboola(global, data) {
     });
   });
 
-  // load the taboola loader asynchronously
+  // load the taboola loader asynchronously;
+  const publisher = encodeURIComponent(data.publisher);
   loadScript(
     global,
-    `https://cdn.taboola.com/libtrc/${encodeURIComponent(
-      data.publisher
-    )}/loader.js`
+    `https://cdn.taboola.com/libtrc/${publisher}/loader.js`,
+    /* opt_cb */ undefined,
+    /* opt_errorCb */ () => {
+      loadScript(
+        global,
+        `https://static.tblcontent.com/libtrc/${publisher}/loader.privacy.js`
+      );
+    }
   );
 }
