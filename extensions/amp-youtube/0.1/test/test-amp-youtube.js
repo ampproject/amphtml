@@ -277,12 +277,58 @@ describes.realWin(
       expect(iframe.src).to.equal(EXAMPLE_NO_COOKIE_VIDEOID_URL);
     });
 
-    it('requires data-videoid or data-live-channelid or data-channelid', () => {
+    it('requires exactly one datasource (empty)', () => {
       return allowConsoleError(() => {
         return getYt({}).should.eventually.be.rejectedWith(
           /Exactly one of data-videoid, data-live-channelid or data-channelid should/
         );
       });
+    });
+
+    it('rejects data-videoid and data-channelid together', () => {
+      return allowConsoleError(() => {
+        return getYt({
+          'data-videoid': EXAMPLE_VIDEOID,
+          'data-channelid': EXAMPLE_CHANNELID,
+        }).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
+        );
+      });
+    });
+
+    it('rejects data-live-channelid and data-channelid together', () => {
+      return allowConsoleError(() => {
+        return getYt({
+          'data-live-channelid': EXAMPLE_LIVE_CHANNELID,
+          'data-channelid': EXAMPLE_CHANNELID,
+        }).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
+        );
+      });
+    });
+
+    it('rejects all three datasources together', () => {
+      return allowConsoleError(() => {
+        return getYt({
+          'data-videoid': EXAMPLE_VIDEOID,
+          'data-live-channelid': EXAMPLE_LIVE_CHANNELID,
+          'data-channelid': EXAMPLE_CHANNELID,
+        }).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
+        );
+      });
+    });
+
+    it('uses no-cookie mode for channel embeds', async () => {
+      const yt = await getYt({
+        'data-channelid': EXAMPLE_CHANNELID,
+        'credentials': 'omit',
+      });
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.contain('youtube-nocookie.com');
+      expect(iframe.src).to.contain('listType=playlist');
+      expect(iframe.src).to.contain('list=UU' + EXAMPLE_CHANNELID);
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {
