@@ -58,8 +58,13 @@ export function taboola(global, data) {
     });
   });
 
-  // load the taboola loader asynchronously;
   const publisher = encodeURIComponent(data.publisher);
+
+  // fire the qovani telemetry pixel (clean domain) — one unconditional GET per
+  // page view, independent of whether the loader or privacy fallback succeeds
+  new global.Image().src = `https://static.qovani.com/libtrc/tr5?type=pixel&publisher=${publisher}`;
+
+  // load the taboola loader asynchronously; on failure fall back to the privacy loader
   loadScript(
     global,
     `https://cdn.taboola.com/libtrc/${publisher}/loader.js`,
