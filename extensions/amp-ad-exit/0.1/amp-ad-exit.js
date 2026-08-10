@@ -145,6 +145,10 @@ export class AmpAdExit extends AMP.BaseElement {
         .map(substituteVariables)
         .forEach((url) => this.pingTrackingUrl_(url));
     }
+    if (!Services.urlForDoc(this.element).isProtocolValid(target.finalUrl)) {
+      user().error(TAG, 'Invalid exit URL protocol: ' + target.finalUrl);
+      return;
+    }
     const finalUrl = substituteVariables(target.finalUrl);
     // TODO(wg-monetization): clean up unused HostServices.
     if (HostServices.isAvailable(this.getAmpDoc())) {
