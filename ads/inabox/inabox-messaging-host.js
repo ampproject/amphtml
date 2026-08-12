@@ -56,6 +56,7 @@ class NamedObservable {
 /** @typedef {{
       iframe: !HTMLIFrameElement,
       measurableFrame: !HTMLIFrameElement,
+      source: !Window,
       observeUnregisterFn: (!UnlistenDef|undefined),
   }} */
 let AdFrameDef;
@@ -269,8 +270,12 @@ export class InaboxMessagingHost {
    * @private
    */
   getFrameElement_(source, sentinel) {
-    if (this.iframeMap_[sentinel]) {
-      return this.iframeMap_[sentinel];
+    const knownFrame = this.iframeMap_[sentinel];
+    if (knownFrame) {
+      // A sentinel is bound to the source window that first registered it.
+      // Reject a message that reuses the sentinel from a different source so
+      // a frame can't read another frame's position by spoofing its sentinel.
+      return knownFrame.source === source ? knownFrame : null;
     }
     const measurableFrame = this.getMeasureableFrame(source);
     if (!measurableFrame) {
@@ -285,7 +290,7 @@ export class InaboxMessagingHost {
         j++, tempWin = tempWin.parent
       ) {
         if (iframe.contentWindow == tempWin) {
-          this.iframeMap_[sentinel] = {iframe, measurableFrame};
+          this.iframeMap_[sentinel] = {iframe, measurableFrame, source};
           return this.iframeMap_[sentinel];
         }
         if (tempWin == window.top) {
