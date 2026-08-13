@@ -103,6 +103,35 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
       ).to.be.false;
     });
 
+    it('should not leak position to a frame reusing another sentinel', () => {
+      // iframe1 registers the sentinel.
+      expect(
+        host.processMessage({
+          source: iframe1.contentWindow,
+          origin: 'www.example.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-123',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.true;
+      // A different frame reusing iframe1's sentinel is rejected.
+      expect(
+        host.processMessage({
+          source: iframe2.contentWindow,
+          origin: 'www.evil.com',
+          data:
+            'amp-' +
+            JSON.stringify({
+              sentinel: '0-123',
+              type: 'send-positions',
+            }),
+        })
+      ).to.be.false;
+    });
+
     it('should ignore message from untrusted iframe', () => {
       expect(
         host.processMessage({
@@ -511,12 +540,28 @@ describes.realWin('inabox-host:messaging', {}, (env) => {
       host.iframeMap_[sentinel] = {
         'iframe': creativeIframeMock,
         'measurableFrame': creativeIframeMock,
+        'source': creativeWinMock,
       };
       const {measurableFrame} = host.getFrameElement_(
         creativeWinMock,
         sentinel
       );
       expect(measurableFrame).to.equal(creativeIframeMock);
+    });
+
+    it('should not return cached frame for a different source', () => {
+      host.getMeasureableFrame = () => {
+        throw new Error('Error!!');
+      };
+      const creativeWinMock = {};
+      const otherWinMock = {};
+      const creativeIframeMock = {};
+      host.iframeMap_[sentinel] = {
+        'iframe': creativeIframeMock,
+        'measurableFrame': creativeIframeMock,
+        'source': creativeWinMock,
+      };
+      expect(host.getFrameElement_(otherWinMock, sentinel)).to.be.null;
     });
 
     it('should return null if frame is not registered', () => {
