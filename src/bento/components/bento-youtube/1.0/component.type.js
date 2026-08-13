@@ -7,6 +7,7 @@
  *   onLoad: (function():undefined|undefined),
  *   videoid: (string|undefined),
  *   liveChannelid: (string|undefined),
+ *   channelid: (string|undefined),
  *   params: Object,
  *   credentials: (string|undefined),
  * }}

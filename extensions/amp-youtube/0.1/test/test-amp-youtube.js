@@ -12,7 +12,7 @@ const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
 const EXAMPLE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
 const EXAMPLE_VIDEOID_URL = `https://www.youtube.com/embed/${EXAMPLE_VIDEOID}?enablejsapi=1&amp=1&playsinline=1`;
 const EXAMPLE_LIVE_CHANNELID_URL = `https://www.youtube.com/embed/live_stream?channel=${EXAMPLE_LIVE_CHANNELID}&enablejsapi=1&amp=1&playsinline=1`;
-const EXAMPLE_CHANNELID_URL = `https://www.youtube.com/embed/?listType=playlist&list=UU${EXAMPLE_CHANNELID}&enablejsapi=1&amp=1&playsinline=1`;
+const EXAMPLE_CHANNELID_URL = `https://www.youtube.com/embed/?listType=playlist&list=UU${EXAMPLE_CHANNELID.slice(2)}&enablejsapi=1&amp=1&playsinline=1`;
 const EXAMPLE_NO_COOKIE_VIDEOID_URL = `https://www.youtube-nocookie.com/embed/${EXAMPLE_VIDEOID}?enablejsapi=1&amp=1&playsinline=1`;
 
 describes.realWin(
@@ -328,7 +328,7 @@ describes.realWin(
       expect(iframe).to.not.be.null;
       expect(iframe.src).to.contain('youtube-nocookie.com');
       expect(iframe.src).to.contain('listType=playlist');
-      expect(iframe.src).to.contain('list=UU' + EXAMPLE_CHANNELID);
+      expect(iframe.src).to.contain('list=UU' + EXAMPLE_CHANNELID.slice(2));
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {

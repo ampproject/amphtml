@@ -207,6 +207,7 @@ function BentoYoutubeWithRef(
  * @param {string} credentials
  * @param {string} videoid
  * @param {string} liveChannelid
+ * @param {string} channelid
  * @return {string}
  * @private
  */
@@ -225,9 +226,10 @@ function getEmbedUrl(credentials, videoid, liveChannelid, channelid) {
     )}&`;
   } else {
     // Channel embeds use the channel's uploads playlist. The uploads
-    // playlist id is the channel id prefixed with "UU".
+    // playlist id is derived from the channel id by replacing the
+    // leading "UC" with "UU".
     descriptor = `?listType=playlist&list=UU${encodeURIComponent(
-      channelid || ''
+      (channelid || '').replace(/^UC/, '')
     )}&`;
   }
   return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
