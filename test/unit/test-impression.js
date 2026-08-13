@@ -481,5 +481,11 @@ describes.realWin('impression', {amp: true}, (env) => {
       test('https://t.com/asdf', false);
       test('https://t.cn/asdf', false);
     });
+
+    it('should not trust lookalike hosts that match an unescaped dot', () => {
+      test('https://taco/asdf', false);
+      test('https://txco/asdf', false);
+      test('https://t-co/asdf', false);
+    });
   });
 });

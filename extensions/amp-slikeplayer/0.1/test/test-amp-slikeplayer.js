@@ -2,6 +2,7 @@ import '../amp-slikeplayer';
 
 import {listenOncePromise} from '#utils/event-helper';
 
+import * as consent from '../../../../src/consent';
 import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 describes.realWin(
@@ -74,6 +75,25 @@ describes.realWin(
       const src = iframe.getAttribute('src');
       expect(src).to.contain('autoplay=true');
       expect(src).to.contain('viewport=50');
+    });
+
+    it('adds amp=1 to iframe src with and without data-config', async () => {
+      const {el: noConfig} = await buildPlayer({
+        'data-apikey': 'a',
+        'data-videoid': 'b',
+      });
+      expect(noConfig.querySelector('iframe').getAttribute('src')).to.contain(
+        'amp=1'
+      );
+
+      const {el: withConfig} = await buildPlayer({
+        'data-apikey': 'a',
+        'data-videoid': 'b',
+        'data-config': 'autoplay=true',
+      });
+      expect(withConfig.querySelector('iframe').getAttribute('src')).to.contain(
+        'amp=1'
+      );
     });
 
     it('parses viewport threshold from percent and ratio', async () => {
@@ -211,6 +231,126 @@ describes.realWin(
       expect(removed).to.be.true;
       // Subsequent layout should be possible
       await el.layoutCallback();
+    });
+
+    it('fullscreenEnter/Exit delegate to the iframe, guarded by null', async () => {
+      const {iframe, impl} = await buildPlayer();
+      const enterSpy = (iframe.requestFullscreen = env.sandbox.spy());
+      const exitSpy = (iframe.exitFullscreen = env.sandbox.spy());
+
+      impl.fullscreenEnter();
+      expect(enterSpy).to.have.been.calledOnce;
+
+      impl.fullscreenExit();
+      expect(exitSpy).to.have.been.calledOnce;
+
+      // No iframe: methods are no-ops and must not throw.
+      impl.iframe_ = null;
+      expect(() => impl.fullscreenEnter()).to.not.throw();
+      expect(() => impl.fullscreenExit()).to.not.throw();
+    });
+
+    it('isFullscreen returns false without an iframe and by default', async () => {
+      const {impl} = await buildPlayer();
+      expect(impl.isFullscreen()).to.be.false;
+      impl.iframe_ = null;
+      expect(impl.isFullscreen()).to.be.false;
+    });
+
+    it('showControls/hideControls post the matching methods', async () => {
+      const {impl} = await buildPlayer();
+      const postSpy = env.sandbox.spy(impl, 'postMessage_');
+      impl.showControls();
+      impl.hideControls();
+      await Promise.resolve();
+      const methods = postSpy.getCalls().map((c) => c.args[0]);
+      expect(methods).to.include('showControls');
+      expect(methods).to.include('hideControls');
+    });
+
+    it('updates duration from meta and time events', async () => {
+      const {iframe, impl} = await buildPlayer();
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        data: JSON.stringify({event: 'meta', detail: {duration: 120}}),
+      });
+      expect(impl.getDuration()).to.equal(120);
+
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        data: JSON.stringify({
+          event: 'time',
+          detail: {currentTime: 5, duration: 200},
+        }),
+      });
+      expect(impl.getDuration()).to.equal(200);
+    });
+
+    it('ignores messages from an unexpected origin', async () => {
+      const {iframe, impl} = await buildPlayer();
+      const initial = impl.getCurrentTime();
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        origin: 'https://evil.example.com',
+        data: JSON.stringify({event: 'time', detail: {currentTime: 77}}),
+      });
+      expect(impl.getCurrentTime()).to.equal(initial);
+
+      // Matching origin is accepted.
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        origin: 'https://tvid.in',
+        data: JSON.stringify({event: 'time', detail: {currentTime: 88}}),
+      });
+      expect(impl.getCurrentTime()).to.equal(88);
+    });
+
+    it('calls sendConsentData_ on send-consent-data message', async () => {
+      const consentData = {
+        consentPolicyState: 1,
+        consentString: 'abc123',
+        consentMetadata: {gdprApplies: true, purposeOne: true},
+        consentPolicySharedData: null,
+      };
+      env.sandbox
+        .stub(consent, 'getConsentDataToForward')
+        .resolves(consentData);
+
+      const {iframe, impl} = await buildPlayer();
+      const sendSpy = env.sandbox.spy(impl, 'sendConsentData_');
+
+      // Simulate consent request from iframe (raw object, not JSON)
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        data: {type: 'send-consent-data', sentinel: 'amp'},
+      });
+
+      expect(sendSpy).to.have.been.calledOnce;
+
+      // Wait for the consent promise to resolve
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(consent.getConsentDataToForward).to.have.been.calledOnce;
+    });
+
+    it('does not send consent data if iframe is gone', async () => {
+      const consentData = {consentPolicyState: 2};
+      env.sandbox
+        .stub(consent, 'getConsentDataToForward')
+        .resolves(consentData);
+
+      const {iframe, impl} = await buildPlayer();
+
+      // Destroy iframe before consent resolves
+      impl.iframe_ = null;
+
+      impl.onMessage_({
+        source: iframe.contentWindow,
+        data: {type: 'send-consent-data', sentinel: 'amp'},
+      });
+
+      await new Promise((r) => setTimeout(r, 0));
+      // No error thrown — silently skipped
     });
   }
 );

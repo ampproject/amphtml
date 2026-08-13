@@ -1,0 +1,21 @@
+{
+    "vars": {
+        "site": "",
+        "client_id": "",
+        "publishers_sites_id": ""
+    },
+    "requests": {
+        "pageview": "https://c.adskeeper.com/pv?site=${site}&client_id=${client_id}&publishers_sites_id=${publishers_sites_id}&i=1&pr=${externalReferrer}&cbuster=${random}&pvid=${pageViewId64}&implVersion=19&cxurl=${canonicalUrl}&pv_types=tpv&scua=%22${uach(architecture)}%22&scub=%22${uach(bitness)}%22&scu_amp=${uach(brands)}&scufvl_amp=${uach(fullVersionList)}&scum=%3F$IF($EQUALS(${uach(mobile)}, true), 1, 0)&scumd=%22${uach(model)}%22&scup=%22${uach(platform)}%22&scupv=%22${uach(platformVersion)}%22&scufv=%22${uach(uaFullVersion)}%22&scuw=%3F$IF($EQUALS(${uach(wow64)}, true), 1, 0)&gdpr_consent=$IF($EQUALS(CONSENT_METADATA(consentStringType), 1), ${consentString})$IF($EQUALS(CONSENT_METADATA(consentStringType), 2), ${consentString})&gdpr=$IF($EQUALS(CONSENT_METADATA(gdprApplies), true), 1)$IF($EQUALS(CONSENT_METADATA(gdprApplies), false), 0)&us_privacy=$IF($EQUALS(CONSENT_METADATA(consentStringType), 3), ${consentString})&gpp=$IF($EQUALS(CONSENT_METADATA(consentStringType), 4), ${consentString})&gpp_sid=$IF($EQUALS(CONSENT_METADATA(consentStringType), 4), CONSENT_METADATA(gppSectionId))"
+    },
+    "triggers": {
+        "trackPageview": {
+            "on": "visible",
+            "request": "pageview"
+        }
+    },
+    "transport": {
+        "beacon": false,
+        "xhrpost": false,
+        "image": true
+    }
+}

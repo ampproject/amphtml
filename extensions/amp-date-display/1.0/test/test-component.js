@@ -227,7 +227,7 @@ describes.sandboxed('DateDisplay 1.0 preact component', {}, (env) => {
       timeZoneNameShort: 'EST',
     },
     'ja-JP': {
-      timeZoneName: 'アメリカ東部標準時',
+      timeZoneName: '米国東部標準時',
       timeZoneNameShort: 'GMT-5',
     },
     'ar-EG': {

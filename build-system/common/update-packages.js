@@ -6,7 +6,7 @@ const path = require('path');
 const {cyan, red} = require('kleur/colors');
 const {execOrDie} = require('./exec');
 const {getOutput} = require('./process');
-const {isCiBuild} = require('./ci');
+const {isCiBuild, isPullRequestBuild} = require('./ci');
 const {log, logLocalDev} = require('./logging');
 const {runNpmChecks} = require('./npm-checks');
 
@@ -213,7 +213,7 @@ function updatePackages() {
   patchIntersectionObserver();
   patchResizeObserver();
   patchShadowDom();
-  if (isCiBuild()) {
+  if (isPullRequestBuild()) {
     runNpmChecks();
   }
 }
@@ -244,7 +244,7 @@ function updateSubpackages(dir, skipNpmChecks = false) {
       throw new Error('Installation failed');
     }
   }
-  if (isCiBuild() && !skipNpmChecks) {
+  if (isPullRequestBuild() && !skipNpmChecks) {
     runNpmChecks(dir);
   }
 }

@@ -7,19 +7,19 @@
     amp markdown-toc --fix
 -->
 
--   [Who should read this doc?](#who-should-read-this-doc)
--   [What is Specificity?](#what-is-specificity)
-    -   [Example: CSS selectors](#example-css-selectors)
-    -   [How to calculate Specificity](#how-to-calculate-specificity)
--   [Writing CSS in AMP Runtime or Extensions](#writing-css-in-amp-runtime-or-extensions)
-    -   [Creating a new Selector](#creating-a-new-selector)
-    -   [Modifying an existing Selector](#modifying-an-existing-selector)
-    -   [FOUC](#fouc)
-    -   [Rule of thumb](#rule-of-thumb)
--   [Case Studies](#case-studies)
-    -   [AMP Selector CSS has high specificity](#amp-selector-css-has-high-specificity)
-    -   [AMP Accordion CSS changes broke specificity](#amp-accordion-css-changes-broke-specificity)
--   [Reading material](#reading-material)
+- [Who should read this doc?](#who-should-read-this-doc)
+- [What is Specificity?](#what-is-specificity)
+    - [Example: CSS selectors](#example-css-selectors)
+    - [How to calculate Specificity](#how-to-calculate-specificity)
+- [Writing CSS in AMP Runtime or Extensions](#writing-css-in-amp-runtime-or-extensions)
+    - [Creating a new Selector](#creating-a-new-selector)
+    - [Modifying an existing Selector](#modifying-an-existing-selector)
+    - [FOUC](#fouc)
+    - [Rule of thumb](#rule-of-thumb)
+- [Case Studies](#case-studies)
+    - [AMP Selector CSS has high specificity](#amp-selector-css-has-high-specificity)
+    - [AMP Accordion CSS changes broke specificity](#amp-accordion-css-changes-broke-specificity)
+- [Reading material](#reading-material)
 
 ## Who should read this doc?
 
@@ -183,9 +183,9 @@ Fixing PR: https://github.com/ampproject/amphtml/commit/e12deb125bc0bed16d33481e
 +}
 ```
 
--   Breaking change: https://github.com/ampproject/amphtml/commit/f2a361651b4b4d1d484c6cd9502c895695545d
--   GH Issue : https://github.com/ampproject/amphtml/issues/10224
--   Partial Rollback: https://github.com/ampproject/amphtml/pull/10225
+- Breaking change: https://github.com/ampproject/amphtml/commit/f2a361651b4b4d1d484c6cd9502c895695545d
+- GH Issue : https://github.com/ampproject/amphtml/issues/10224
+- Partial Rollback: https://github.com/ampproject/amphtml/pull/10225
 
 The lesson learnt here is that even though the breaking CSS was a good change (it fixed the FOUC
 due to the class introduced at BUILD), it moved properties from a selector with LOWER
@@ -193,6 +193,6 @@ specificity to HIGHER specificity, which breaks backward compatibility.
 
 ## Reading material
 
--   https://csswizardry.com/2014/07/hacks-for-dealing-with-specificity/
--   https://csswizardry.com/2012/05/keep-your-css-selectors-short/
--   https://philipwalton.com/articles/do-we-actually-need-specificity-in-css/
+- https://csswizardry.com/2014/07/hacks-for-dealing-with-specificity/
+- https://csswizardry.com/2012/05/keep-your-css-selectors-short/
+- https://philipwalton.com/articles/do-we-actually-need-specificity-in-css/

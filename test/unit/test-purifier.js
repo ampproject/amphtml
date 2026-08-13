@@ -193,6 +193,12 @@ describes.sandboxed('DOMPurify-based', {}, (env) => {
       expect(rewriteAttributeValueSpy.callCount).to.be.equal(1);
     });
 
+    it('should output "expanded" attribute', () => {
+      expect(purify('<section expanded>Header</section>')).to.equal(
+        '<section expanded="">Header</section>'
+      );
+    });
+
     it('should default target to _top with href', () => {
       // Can't use string equality since DOMPurify will reorder attributes.
       const actual = serialize(
@@ -408,16 +414,20 @@ describes.sandboxed('DOMPurify-based', {}, (env) => {
     it('should output diff marker attributes for some elements', () => {
       // Elements with bindings should have [i-amphtml-key=<number>].
       expect(purify('<p [x]="y"></p>')).to.match(
-        /<p data-amp-bind-x="y" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>/
+        /<p data-amp-bind-x="y" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/p>|<p i-amphtml-binding="" data-amp-bind-x="y" i-amphtml-key="(\d+)"><\/p>/
       );
       // AMP elements should have [i-amphtml-key=<number>].
       expect(purify('<amp-pixel></amp-pixel>')).to.match(
         /<amp-pixel i-amphtml-key="(\d+)"><\/amp-pixel>/
       );
       // AMP elements with bindings should have [i-amphtml-key=<number>].
-      expect(purify('<amp-pixel [x]="y"></amp-pixel>')).to.match(
-        /<amp-pixel data-amp-bind-x="y" i-amphtml-binding="" i-amphtml-key="(\d+)"><\/amp-pixel>/
-      );
+      const pixelEl = self.document.createElement('div');
+      pixelEl.innerHTML = purify('<amp-pixel [x]="y"></amp-pixel>');
+      const pixelAmpEl = pixelEl.firstElementChild;
+      expect(pixelAmpEl.tagName).to.equal('AMP-PIXEL');
+      expect(pixelAmpEl.getAttribute('data-amp-bind-x')).to.equal('y');
+      expect(pixelAmpEl.hasAttribute('i-amphtml-binding')).to.be.true;
+      expect(pixelAmpEl.getAttribute('i-amphtml-key')).to.match(/^\d+$/);
       // amp-img should have [i-amphtml-ignore].
       expect(purify('<amp-img></amp-img>')).to.equal(
         '<amp-img i-amphtml-ignore=""></amp-img>'
@@ -578,6 +588,14 @@ describes.sandboxed('DOMPurify-based', {}, (env) => {
         allowConsoleError(() => {
           expect(
             purify('<div style="color:blue!important">Test</div>')
+          ).to.equal('<div>Test</div>');
+        });
+      });
+
+      it('should ignore styles containing spaced `! important`', () => {
+        allowConsoleError(() => {
+          expect(
+            purify('<div style="color:blue ! important">Test</div>')
           ).to.equal('<div>Test</div>');
         });
       });

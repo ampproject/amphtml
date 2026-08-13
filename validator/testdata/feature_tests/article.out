@@ -387,7 +387,7 @@ feature_tests/article.html:273:2 The tag 'content' is disallowed.
 |            <figure>
 |              <amp-video
 |                autoplay
-|                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+|                src="https://amp-sample-videos.netlify.app/ForBiggerJoyrides.mp4"
 |                width="720"
 |                height="405"
 |                layout="responsive"

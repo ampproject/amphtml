@@ -117,7 +117,7 @@ export const _default = (args) => {
             <video
               width="400"
               height="250"
-              src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+              src="https://amp-sample-videos.netlify.app/BigBuckBunny.mp4"
               poster="https://peach.blender.org/wp-content/uploads/bbb-splash.png"
               controls
             >

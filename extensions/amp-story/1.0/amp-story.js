@@ -2694,9 +2694,9 @@ export class AmpStory extends AMP.BaseElement {
     }
     return Boolean(
       win.CSS &&
-        win.CSS.supports &&
-        win.CSS.supports('display', 'grid') &&
-        win.CSS.supports('color', 'var(--test)')
+      win.CSS.supports &&
+      win.CSS.supports('display', 'grid') &&
+      win.CSS.supports('color', 'var(--test)')
     );
   }
 

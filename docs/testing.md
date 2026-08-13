@@ -11,28 +11,28 @@ This document provides details for testing and building your AMP code.
     amp markdown-toc --fix
 -->
 
--   [Testing commands](#testing-commands)
--   [Manual testing](#manual-testing)
-    -   [Serve Mode](#serve-mode)
-    -   [Examples](#examples)
-    -   [Document proxy](#document-proxy)
-    -   [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
-    -   [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
-    -   [Chrome extension](#chrome-extension)
--   [Visual Diff Tests](#-visual-diff-tests)
-    -   [Failing Tests](#failing-tests)
-    -   [Flaky Tests](#flaky-tests)
-    -   [How Are Tests Executed](#how-are-tests-executed)
-    -   [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
--   [Isolated Component Testing](#isolated-component-testing)
-    -   [Launching Storybook](#launching-storybook)
-    -   [Writing test scenarios](#writing-test-scenarios)
--   [Testing on devices](#testing-on-devices)
-    -   [Testing with ngrok](#testing-with-ngrok)
-    -   [Testing with Firebase](#testing-with-firebase)
-        -   [Testing Ads](#testing-ads)
--   [End-to-End Tests](#end-to-end-tests)
--   [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
+- [Testing commands](#testing-commands)
+- [Manual testing](#manual-testing)
+    - [Serve Mode](#serve-mode)
+    - [Examples](#examples)
+    - [Document proxy](#document-proxy)
+    - [A4A envelope (/a4a/, /a4a-3p/)](#a4a-envelope-a4a-a4a-3p)
+    - [In-a-box envelope (/inabox/)](#in-a-box-envelope-inabox)
+    - [Chrome extension](#chrome-extension)
+- [Visual Diff Tests](#-visual-diff-tests)
+    - [Failing Tests](#failing-tests)
+    - [Flaky Tests](#flaky-tests)
+    - [How Are Tests Executed](#how-are-tests-executed)
+    - [Adding and Modifying Visual Diff Tests](#adding-and-modifying-visual-diff-tests)
+- [Isolated Component Testing](#isolated-component-testing)
+    - [Launching Storybook](#launching-storybook)
+    - [Writing test scenarios](#writing-test-scenarios)
+- [Testing on devices](#testing-on-devices)
+    - [Testing with ngrok](#testing-with-ngrok)
+    - [Testing with Firebase](#testing-with-firebase)
+        - [Testing Ads](#testing-ads)
+- [End-to-End Tests](#end-to-end-tests)
+- [Performance Testing Node Build Tools](#performance-testing-node-build-tools)
 
 ## Testing commands
 
@@ -149,11 +149,11 @@ For manual testing build AMP and start the Node.js server by running `amp`.
 
 There are 5 serving modes:
 
--   DEFAULT mode serves unminified AMP. Use this during normal development by simply running `amp`.
--   MINIFIED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `amp --minified`.
--   CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `amp serve --cdn`.
--   RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `amp serve --rtv <rtv_number>`
--   ESM mode serves the esm (module) binaries. First run `amp dist --fortesting --esm` and then serve esm mode by running `amp serve --esm`. _This mode is new, and under active development._
+- DEFAULT mode serves unminified AMP. Use this during normal development by simply running `amp`.
+- MINIFIED mode serves minified AMP. This is closer to what is served in production on the stable channel. Serve this mode by running `amp --minified`.
+- CDN mode serves stable channel binaries. Local changes are not served in this mode. Serve CDN mode by running `amp serve --cdn`.
+- RTV mode serves the bundle from the given RTV number (a 15 digit number). E.g. `001907161745080`. Serve RTV mode by running `amp serve --rtv <rtv_number>`
+- ESM mode serves the esm (module) binaries. First run `amp dist --fortesting --esm` and then serve esm mode by running `amp serve --esm`. _This mode is new, and under active development._
 
 To switch serving mode during runtime, go to http://localhost:8000/serve_mode=MODE and set `MODE` to one of the following values: `default`, `compiled`, `cdn` or `<RTV_NUMBER>`.
 
@@ -191,8 +191,8 @@ A4A can be run either of these two modes:
 
 The following forms are supported:
 
--   local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
--   proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
+- local document: http://localhost:8000/a4a[-3p]/examples/animations.amp.html
+- proxied document with local sources: http://localhost:8000/a4a[-3p]/proxy/output.jsbin.com/pegizoq/quiet
 
 When accessing minified JS make sure you run `amp dist` with the `--fortesting`
 flag so that we do not strip out the localhost code paths. (We do some
@@ -205,9 +205,9 @@ Notice that all documents are assumed to have a "fake" signature. Thus, this fun
 
 Additionally, the following query parameters can be provided:
 
--   `width` - the width of the `amp-ad` (default "300")
--   `height` - the height of the `amp-ad` (default "250")
--   `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+- `width` - the width of the `amp-ad` (default "300")
+- `height` - the height of the `amp-ad` (default "250")
+- `offset` - the offset to push the `amp-ad` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 ### In-a-box envelope (/inabox/)
 
@@ -215,14 +215,14 @@ If you are working on AMP In-a-box Ads, you can use the local in-a-box envelope 
 
 The following forms are supported:
 
--   local document: http://localhost:8000/inabox/examples/animations.amp.html
--   proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
+- local document: http://localhost:8000/inabox/examples/animations.amp.html
+- proxied document with local sources: http://localhost:8000/inabox/proxy/output.jsbin.com/pegizoq/quiet
 
 Additionally, the following query parameters can be provided:
 
--   `width` - the width of the `iframe` (default "300")
--   `height` - the height of the `iframe` (default "250")
--   `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
+- `width` - the width of the `iframe` (default "300")
+- `height` - the height of the `iframe` (default "250")
+- `offset` - the offset to push the `iframe` down the page (default "0px"). Can be used to push the Ad out of the viewport, e.g. using `offset=150vh`.
 
 ### Chrome extension
 
@@ -234,10 +234,10 @@ In addition to building the AMP runtime and running `amp [unit|integration]`, th
 
 The technology stack used is:
 
--   [Percy](https://percy.io/), a visual regression testing service for webpages
--   [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
--   [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
--   [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
+- [Percy](https://percy.io/), a visual regression testing service for webpages
+- [Puppeteer](https://developers.google.com/web/tools/puppeteer/), a driver capable of loading webpages for diffing
+- [Percy-Puppeteer](https://github.com/percy/percy-puppeteer), a framework that integrates Puppeteer with Percy
+- [Headless Chrome](https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md), the Chrome/Chromium browser in headless mode
 
 The [`ampproject/amphtml`](https://github.com/ampproject/amphtml) repository on GitHub is linked to the [Percy project](https://percy.io/ampproject/amphtml) of the same name. You will see a check called `percy/amphtml` on your PR. If your PR results in visual diff(s), clicking on the `details` link will show you the snapshots with the diffs highlighted.
 
@@ -253,12 +253,12 @@ If a Percy test flakes and you would like to trigger a rerun, you can't do that 
 
 Visual diff tests are defined in the [`visual-tests.jsonc`](../test/visual-diff/visual-tests.jsonc), see file for the configurations of each test. When running, the visual diff test runner does the following for each test case:
 
--   Navgates to the defined page using a headless Chrome browser
--   Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
--   If defined, waits until the appropriate CSS selectors appear/disappear from the page
--   If defined, waits an arbitrary amount of time (e.g., for components that have time-delayed mutations)
--   If defined, executes any custom interaction test code
--   Uploads a snapshot of the page's DOM (converted to an HTML string) to the Percy service
+- Navgates to the defined page using a headless Chrome browser
+- Waits for the page to finish loading, both by verifying idle network connections and lack of loader animations
+- If defined, waits until the appropriate CSS selectors appear/disappear from the page
+- If defined, waits an arbitrary amount of time (e.g., for components that have time-delayed mutations)
+- If defined, executes any custom interaction test code
+- Uploads a snapshot of the page's DOM (converted to an HTML string) to the Percy service
 
 When all snapshots finish uploading, Percy will process the visual diffs and report back to GitHub as a pull request status. Percy renders the snapshots in their own browsers and take a screenshot. If the new screenshot differs from the previously approved screenshot you will get a visual highlighting of where that difference lies.
 
@@ -286,13 +286,13 @@ amp storybook
 
 You may launch a specific environment by providing `--storybook_env`:
 
--   **`preact`**
+- **`preact`**
 
     ```sh
     amp storybook --storybook_env=preact
     ```
 
--   **`react`**
+- **`react`**
 
     ```sh
     amp storybook --storybook_env=react
@@ -300,7 +300,7 @@ You may launch a specific environment by providing `--storybook_env`:
 
     > Launching the **`react`** environment requires component bundles. You should ensure that they're present in `extensions/**/dist` directories beforehand, by running `amp build --extensions=...` for all Bento components.
 
--   **`amp`**
+- **`amp`**
 
     ```sh
     amp storybook --storybook_env=amp
@@ -312,13 +312,13 @@ You may launch a specific environment by providing `--storybook_env`:
 
 Test scenarios (stories) are located inside a component's directory. Their filename suffix determines whether they run on the `amp` environment, or on the `preact` and `react` environments:
 
--   **`preact`** Stories end with `.js`:
+- **`preact`** Stories end with `.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.js`
 
--   **`react`** Stories use the same files as **`preact`**.
+- **`react`** Stories use the same files as **`preact`**.
 
--   **`amp`** Stories end with `.amp.js`:
+- **`amp`** Stories end with `.amp.js`:
 
     `extensions/amp-example/0.1/storybook/Basic.amp.js`
 
@@ -348,13 +348,13 @@ amp firebase
 firebase deploy
 ```
 
--   When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
+- When initializing firebase within the directory via `firebase init`, make sure to select the following options when asked:
 
-*   "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
-*   "What do you want to use as your public directory?" enter `firebase`.
-*   "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
-    -   Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
-*   "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
+* "Which Firebase CLI features do you want to setup for this folder?" select `Hosting: Configure and deploy Firebase Hosting sites`.
+* "What do you want to use as your public directory?" enter `firebase`.
+* "Select a default Firebase project for this directory:" select your project name if it's already created, otherwise choose `[don't setup a new project]` and add one later.
+    - Note: If you haven't already, you will have to create a project via the [Firebase Console](https://console.firebase.google.com) after you are done initializing and before you deploy. Once you create the project, you can make it active in your CLI with `firebase use your-project-name` or give it an alias by selecting your project after running `firebase use --add`.
+* "Configure as a single-page app (rewrite all urls to /index.html)?" select `n`.
 
 `amp firebase` will generate a `firebase` folder and copy over all files from `dist`, `examples` and `test/manual`. It will rewrite all urls in the copied files to point to the local versions of AMP (i.e. the ones copied from `dist` to `firebase/dist`). When you initialize firebase, you should set the `firebase` `public` directory to `firebase`. This way `firebase deploy` will just directly copy and deploy the contents of the generated `firebase` folder. As an example, your `firebase.json` file can look something like this:
 

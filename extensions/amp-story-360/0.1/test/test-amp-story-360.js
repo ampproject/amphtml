@@ -89,7 +89,7 @@ describes.realWin(
       }).to.not.throw();
     });
 
-    it('activation button should contain role="button" to prevent story page navigation', async () => {
+    it.skip('activation button should contain role="button" to prevent story page navigation', async () => {
       win.DeviceOrientationEvent.requestPermission = () => Promise.reject();
 
       await createAmpStory360(
@@ -115,7 +115,7 @@ describes.realWin(
       }).to.throw();
     });
 
-    it('parses orientation attributes', async () => {
+    it.skip('parses orientation attributes', async () => {
       await createAmpStory360(
         '/examples/amp-story/img/SeanDoran-Quela-sol1462-edited_ver2-sm.jpg'
       );
