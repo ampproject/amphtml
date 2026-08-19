@@ -159,15 +159,15 @@ class AmpYoutube extends AMP.BaseElement {
     const urlSuffix = this.getCredentials_() === 'omit' ? '-nocookie' : '';
     const baseUrl = `https://www.youtube${urlSuffix}.com/embed/`;
     const descriptor = this.videoid_
-      ? `${encodeURIComponent(this.videoid_ || '')}?`
-      : this.liveChannelid_
-      ? `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`
-      : // Channel embeds use the channel's uploads playlist. The uploads
-        // playlist id is derived from the channel id by replacing the
-        // leading "UC" with "UU".
-        `?listType=playlist&list=UU${encodeURIComponent(
-          (this.channelid_ || '').replace(/^UC/, '')
-        )}&`;
+        ? `${encodeURIComponent(this.videoid_ || '')}?`
+        : this.liveChannelid_
+          ? `live_stream?channel=${encodeURIComponent(this.liveChannelid_ || '')}&`
+          : // Channel embeds use the channel's uploads playlist. The uploads
+            // playlist id is derived from the channel id by replacing the
+            // leading "UC" with "UU".
+            `?listType=playlist&list=UU${encodeURIComponent(
+                (this.channelid_ || '').replace(/^UC/, '')
+              )}&`;
     return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
   }
 
