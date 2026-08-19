@@ -109,7 +109,7 @@ function appendOpenTag(node, attrs, result) {
 
   attrs.forEach((attr) => {
     if (node.hasAttribute(attr)) {
-      result.push(` ${attr}="${escapeHtml(node.getAttribute(attr))}"`);
+      result.push(` ${attr}="${escapeHtml(node.getAttribute(attr) ?? '')}"`);
     }
   });
 
