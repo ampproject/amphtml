@@ -264,21 +264,21 @@
       <amp-selector on="select:AMP.setState({selectedSize: event.targetOption})">
         <table>
           <tr>
-            <td [class]="!shirts[selected.id].sizes['XS'] ? 'unavailable' : ''">
+            <td [class]="shirts[selected.id].sizes && !shirts[selected.id].sizes['XS'] ? 'unavailable' : ''">
               <div option="XS">XS</div>
             </td>
-            <td [class]="!shirts[selected.id].sizes['S'] ? 'unavailable' : ''">
+            <td [class]="shirts[selected.id].sizes && !shirts[selected.id].sizes['S'] ? 'unavailable' : ''">
               <div option="S">S</div>
             </td>
-            <td [class]="!shirts[selected.id].sizes['M'] ? 'unavailable' : ''"
+            <td [class]="shirts[selected.id].sizes && !shirts[selected.id].sizes['M'] ? 'unavailable' : ''"
                 class="unavailable">
               <div option="M">M</div>
             </td>
-            <td [class]="!shirts[selected.id].sizes['L'] ? 'unavailable' : ''"
+            <td [class]="shirts[selected.id].sizes && !shirts[selected.id].sizes['L'] ? 'unavailable' : ''"
                 class="unavailable">
               <div option="L">L</div>
             </td>
-            <td [class]="!shirts[selected.id].sizes['XL'] ? 'unavailable' : ''"
+            <td [class]="shirts[selected.id].sizes && !shirts[selected.id].sizes['XL'] ? 'unavailable' : ''"
                 class="unavailable">
               <div option="XL">XL</div>
             </td>
