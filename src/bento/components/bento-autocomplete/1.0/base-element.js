@@ -8,6 +8,8 @@ import {tryParseJson} from '#core/types/object/json';
 import * as Preact from '#preact';
 import {PreactBaseElement} from '#preact/base-element';
 
+import {Purifier} from '#purifier';
+
 import {BentoAutocomplete} from './component';
 import {CSS as COMPONENT_CSS} from './component.jss';
 
@@ -71,10 +73,16 @@ export class BaseElement extends PreactBaseElement {
       return;
     }
 
+    // Mustache only escapes interpolated values; its output is not a security
+    // boundary. Suggestion data can come from a remote `src`, so run the
+    // rendered markup through the AMP Purifier before it reaches the DOM, the
+    // same way amp-mustache and amp-autocomplete sanitize template output.
+    const purifier = new Purifier(this.win.document);
     this.mutateProps({
       'itemTemplate': (data) => {
         const html = mustache.render(template./*OK*/ innerHTML, data);
-        return <div dangerouslySetInnerHTML={{__html: html}} />;
+        const sanitized = purifier.purifyHtml(html)./*OK*/ innerHTML;
+        return <div dangerouslySetInnerHTML={{__html: sanitized}} />;
       },
     });
   }
