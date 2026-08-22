@@ -69,6 +69,7 @@ function createDefaultInfo() {
 function BentoYoutubeWithRef(
   {
     autoplay,
+    channelid,
     credentials,
     liveChannelid,
     loop,
@@ -80,15 +81,19 @@ function BentoYoutubeWithRef(
   ref
 ) {
   const datasourceExists =
-    !(videoid && liveChannelid) && (videoid || liveChannelid);
+    !(videoid && liveChannelid) &&
+    !(videoid && channelid) &&
+    !(liveChannelid && channelid) &&
+    (videoid || liveChannelid || channelid);
 
   if (!datasourceExists) {
     throw new Error(
-      'Exactly one of data-videoid or data-live-channelid should be present for <amp-youtube>'
+      'Exactly one of data-videoid, data-live-channelid or ' +
+        'data-channelid should be present for <amp-youtube>'
     );
   }
 
-  let src = getEmbedUrl(credentials, videoid, liveChannelid);
+  let src = getEmbedUrl(credentials, videoid, liveChannelid, channelid);
   if (!('playsinline' in params)) {
     params['playsinline'] = '1';
   }
@@ -202,10 +207,11 @@ function BentoYoutubeWithRef(
  * @param {string} credentials
  * @param {string} videoid
  * @param {string} liveChannelid
+ * @param {string} channelid
  * @return {string}
  * @private
  */
-function getEmbedUrl(credentials, videoid, liveChannelid) {
+function getEmbedUrl(credentials, videoid, liveChannelid, channelid) {
   let urlSuffix = '';
   if (credentials === 'omit') {
     urlSuffix = '-nocookie';
@@ -214,9 +220,16 @@ function getEmbedUrl(credentials, videoid, liveChannelid) {
   let descriptor = '';
   if (videoid) {
     descriptor = `${encodeURIComponent(videoid)}?`;
-  } else {
+  } else if (liveChannelid) {
     descriptor = `live_stream?channel=${encodeURIComponent(
       liveChannelid || ''
+    )}&`;
+  } else {
+    // Channel embeds use the channel's uploads playlist. The uploads
+    // playlist id is derived from the channel id by replacing the
+    // leading "UC" with "UU".
+    descriptor = `?listType=playlist&list=UU${encodeURIComponent(
+      (channelid || '').replace(/^UC/, '')
     )}&`;
   }
   return `${baseUrl}${descriptor}enablejsapi=1&amp=1`;
