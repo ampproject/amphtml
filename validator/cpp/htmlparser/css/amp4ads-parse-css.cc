@@ -1,13 +1,14 @@
 #include "cpp/htmlparser/css/amp4ads-parse-css.h"
 
-#include "absl/memory/memory.h"
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "cpp/htmlparser/css/parse-css.h"
 #include "re2/re2.h"
 
-using absl::make_unique;
-using std::string_view;
 using amp::validator::ValidationError;
 using std::unique_ptr;
 
@@ -18,7 +19,7 @@ namespace {
 unique_ptr<ErrorToken> CreateParseErrorTokenAt(
     const Token& position_token, ValidationError::Code code,
     const std::vector<std::string>& params) {
-  auto token = make_unique<ErrorToken>(code, params);
+  auto token = std::make_unique<ErrorToken>(code, params);
   position_token.CopyStartPositionTo(token.get());
   return token;
 }

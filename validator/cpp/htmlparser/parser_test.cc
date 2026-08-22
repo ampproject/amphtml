@@ -1,5 +1,8 @@
 #include "cpp/htmlparser/parser.h"
 
+#include <sstream>
+#include <string>
+
 #include "gtest/gtest.h"
 #include "absl/flags/declare.h"
 #include "absl/flags/flag.h"

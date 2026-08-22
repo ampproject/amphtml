@@ -13,6 +13,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -55,12 +56,12 @@ class TableBuilder {
 
   bool Insert(const std::string& s) {
     std::pair<uint32_t, uint32_t> hashes = Hash(s);
-    if (table_[hashes.first] == "") {
+    if (table_[hashes.first].empty()) {
       table_[hashes.first] = s;
       return true;
     }
 
-    if (table_[hashes.second] == "") {
+    if (table_[hashes.second].empty()) {
       table_[hashes.second] = s;
       return true;
     }
@@ -100,7 +101,7 @@ class TableBuilder {
     std::pair<uint32_t, uint32_t> hashes = Hash(entry);
     uint32_t new_location = hashes.first + hashes.second - i;
 
-    if (table_[new_location] != "" && !Push(new_location, depth + 1)) {
+    if (!table_[new_location].empty() && !Push(new_location, depth + 1)) {
       return false;
     }
 
@@ -190,8 +191,8 @@ int main(int argc, char** argv) {
   // Find hash that minimizes table size.
   std::unique_ptr<TableBuilder> table{nullptr};
   for (int i = 0; i < 1; i++) {
-    if (table.get() != nullptr
-        && (1 << (table->hash_num_bits() - 1)) < all_names.size()) {
+    if (table != nullptr &&
+        (1 << (table->hash_num_bits() - 1)) < all_names.size()) {
       break;
     }
 
@@ -199,8 +200,7 @@ int main(int argc, char** argv) {
     uint32_t rand_state;
     uint32_t hash0 = rand_r(&rand_state) % 1000000000;
     for (uint32_t k = 0; k <= 16; k++) {
-      if (table.get() != nullptr && k >= table->hash_num_bits())
-        break;
+      if (table != nullptr && k >= table->hash_num_bits()) break;
       std::unique_ptr<TableBuilder> base(new TableBuilder());
       if (base->Init(hash0, k, all_names)) {
         table.reset(base.release());
@@ -209,7 +209,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (table.get() == nullptr) {
+  if (table == nullptr) {
     std::cerr << "Failed to construct string table." << std::endl;
     std::cerr <<  all_names.size() << ": elements." << std::endl;
     return EXIT_FAILURE;
@@ -224,11 +224,11 @@ int main(int argc, char** argv) {
   while (changed) {
     changed = false;
     for (std::size_t i = 0; i < layout.size(); i++) {
-      if (layout[i] == "") continue;
+      if (layout[i].empty()) continue;
 
       for (std::size_t j = 0; j < layout.size(); j++) {
-        if (i != j && layout[j] != ""
-            && layout[i].find(layout[j]) != std::string::npos) {
+        if (i != j && !layout[j].empty() &&
+            layout[i].find(layout[j]) != std::string::npos) {
           changed = true;
           layout[j] = "";
         }
@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
     int bestj = -1;
     int bestk = 0;
     for (std::size_t i = 0; i < layout.size(); i++) {
-      if (layout[i] == "") continue;
+      if (layout[i].empty()) continue;
 
       for (std::size_t j = 0; j < layout.size(); j++) {
         if (i == j) continue;

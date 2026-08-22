@@ -1,0 +1,44 @@
+# proto-file: devtools/blueprint/blueprint_file.proto
+# proto-message: BlueprintFile
+# DO NOT EDIT! Regenerate the contents by running go/bluze after changing any BUILD file or the Blueprint.
+# Override the default values in third_party.htmlparser.blueprint instead.
+
+buildable_unit: {
+  name: "third_party.htmlparser"
+  build_pattern: "//third_party/htmlparser/..."
+  test_pattern: "//third_party/htmlparser/..."
+  test_tag_filter: "-nofastbuild"
+  build_tag_filter: "-nofastbuild"
+  enable_coverage: true
+  enable_presubmit: true
+  enable_continuous_build: true
+  continuous_build_email: {
+    build_cop_email_id: "other-3p-community-maintainers+htmlparser+buildgardener@google.com"
+  }
+  enable_release: false
+}
+buildable_unit: {
+  name: "third_party.htmlparser.opt"
+  test_pattern: "//third_party/htmlparser/..."
+  test_tag_filter: "-noopt"
+  build_flag: "--compilation_mode=opt"
+  enable_coverage: false
+  enable_presubmit: false
+  enable_continuous_build: false
+  continuous_build_email: {
+    build_cop_email_id: "other-3p-community-maintainers+htmlparser+buildgardener@google.com"
+  }
+  enable_release: false
+  [tap.tap_settings]: {
+    on_demand: true
+    on_demand_frequency: EVERY_4_HOURS
+  }
+}
+continuous_tests: {
+  name: "third_party.htmlparser"
+  buildable_unit_name: "third_party.htmlparser"
+}
+continuous_tests: {
+  name: "third_party.htmlparser.opt"
+  buildable_unit_name: "third_party.htmlparser.opt"
+}

@@ -4,7 +4,6 @@
 #include <array>
 #include <deque>
 #include <functional>
-#include <vector>
 
 #include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/document.h"
@@ -65,7 +64,7 @@ struct ParseOptions {
     std::string_view html, Node* fragment_parent = nullptr);
 
 [[nodiscard]] std::unique_ptr<Document> ParseFragmentWithOptions(
-    const std::string_view html, const ParseOptions& options,
+    std::string_view html, const ParseOptions& options,
     Node* fragment_parent = nullptr);
 
 class Parser {
@@ -84,7 +83,7 @@ class Parser {
                                                  Node* fragment_parent);
 
   friend std::unique_ptr<Document> ParseFragmentWithOptions(
-      const std::string_view html, const ParseOptions& options,
+      std::string_view html, const ParseOptions& options,
       Node* fragment_parent);
 
  private:
@@ -220,8 +219,8 @@ class Parser {
   // Returns the index in p.oe of the highest element
   // whose tag is in matchTags that is in scope. If no matching element is in
   // scope, it returns -1.
-  int IndexOfElementInScope(Scope scope,
-                            const std::vector<Atom>& match_tags) const;
+  template <typename... Args>
+  int IndexOfElementInScope(Scope scope, Args... match_tags) const;
 
   // Is like popUntil, except that it doesn't modify the stack of open elements.
   template <typename... Args>

@@ -1,5 +1,7 @@
 #include "cpp/htmlparser/json/json.h"
 
+#include <string>
+
 #include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/json/types.h"
