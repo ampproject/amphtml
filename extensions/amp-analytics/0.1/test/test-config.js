@@ -338,6 +338,13 @@ describes.realWin(
           'foobar': {'foobar': ['abc', 'def']},
         });
       });
+
+      it('does not pollute Object.prototype via __proto__', function () {
+        // JSON.parse produces a real own "__proto__" key, matching a remote
+        // config response.
+        mergeObjects(JSON.parse('{"__proto__": {"polluted": "yes"}}'), {});
+        expect({}.polluted).to.be.undefined;
+      });
     });
 
     describe('vendor only configs', () => {
