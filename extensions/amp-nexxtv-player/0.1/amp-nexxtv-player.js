@@ -154,7 +154,9 @@ class AmpNexxtvPlayer extends AMP.BaseElement {
       });
       this.pauseHelper_.updatePlaying(true);
 
-      return this.loadPromise(this.iframe_);
+      if (!this.element.hasAttribute('data-origin')) {
+        return this.loadPromise(this.iframe_);
+      }
     });
   }
 
