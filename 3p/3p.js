@@ -169,19 +169,19 @@ export function validateSrcContains(string, src) {
  * @param {function(*)} cb Callback function that is called when the work is
  *     done. The first argument is the result.
  */
-export function computeInMasterFrame(global, taskId, work, cb) {
-  const {master} = global.context;
-  let tasks = master.__ampMasterTasks;
+export function computeInPrimaryFrame(global, taskId, work, cb) {
+  const {primary} = global.context;
+  let tasks = primary.__ampPrimaryTasks;
   if (!tasks) {
-    tasks = master.__ampMasterTasks = {};
+    tasks = primary.__ampPrimaryTasks = {};
   }
   let cbs = tasks[taskId];
   if (!tasks[taskId]) {
     cbs = tasks[taskId] = [];
   }
   cbs.push(cb);
-  if (!global.context.isMaster) {
-    return; // Only do work in master.
+  if (!global.context.isPrimary) {
+    return; // Only do work in primary.
   }
   work((result) => {
     for (let i = 0; i < cbs.length; i++) {
