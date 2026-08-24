@@ -210,6 +210,22 @@ describes.realWin('form-validators', {amp: true}, (env) => {
       validator.report();
       expect(textarea.checkValidity()).to.be.false;
     });
+
+    it('should match <textarea> pattern against the whole value', () => {
+      const textarea = form.querySelector('textarea');
+      textarea.setAttribute('pattern', '[a-z]+');
+
+      // A single-line value that fully matches the pattern is valid.
+      textarea.value = 'abc';
+      validator.report();
+      expect(textarea.checkValidity()).to.be.true;
+
+      // The pattern must apply to the entire value, not per line: a value
+      // whose first line matches but which carries extra content is invalid.
+      textarea.value = 'abc\nNOPE';
+      validator.report();
+      expect(textarea.checkValidity()).to.be.false;
+    });
   });
 
   describe('PolyfillDefaultValidator', () => {
