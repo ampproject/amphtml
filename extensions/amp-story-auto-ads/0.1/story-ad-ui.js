@@ -204,7 +204,17 @@ export function maybeCreateAttribution(win, metadata, container) {
  * @param {string} href
  */
 export function handleAttributionClick(win, href) {
-  openWindowDialog(win, href, '_blank');
+  // `win` is the host story document, so the opened landing page must not keep
+  // a reference back to it (reverse tabnabbing). Mirror the Navigation service:
+  // pass `noopener` where nulling `opener` afterwards is unreliable (iOS/Safari,
+  // non-Chrome), otherwise clear the returned window's `opener` so Chrome still
+  // opens a tab rather than a detached window.
+  const platform = Services.platformFor(win);
+  const features = platform.isIos() || !platform.isChrome() ? 'noopener' : '';
+  const newWin = openWindowDialog(win, href, '_blank', features);
+  if (newWin) {
+    newWin.opener = null;
+  }
 }
 
 /**
