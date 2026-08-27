@@ -1,6 +1,8 @@
 #include "cpp/htmlparser/doctype.h"
 
 #include <sstream>
+#include <string>
+#include <string_view>
 
 #include "cpp/htmlparser/strings.h"
 

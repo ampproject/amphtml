@@ -1,4 +1,8 @@
 #include "cpp/htmlparser/validators/ipaddress.h"
+
+#include <string_view>
+#include <utility>
+
 #include "gtest/gtest.h"
 
 namespace htmlparser::ipaddress {
