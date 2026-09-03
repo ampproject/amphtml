@@ -210,17 +210,19 @@ function buildLoginDone(version) {
 async function buildWebPushPublisherFiles() {
   const distDir = 'dist/v0';
   for (const version of WEB_PUSH_PUBLISHER_VERSIONS) {
-    await Promise.all(WEB_PUSH_PUBLISHER_FILES.map((fileName) => {
-      const tempBuildDir = `build/all/amp-web-push-${version}`;
-      const builtName = `${fileName}.js`;
-      const minifiedName = maybeToEsmName(builtName);
-      return compileJs(`./${tempBuildDir}`, builtName, `./${distDir}`, {
-        watch: argv.watch,
-        includePolyfills: true,
-        minify: true,
-        minifiedName,
-      });
-    }));
+    await Promise.all(
+      WEB_PUSH_PUBLISHER_FILES.map((fileName) => {
+        const tempBuildDir = `build/all/amp-web-push-${version}`;
+        const builtName = `${fileName}.js`;
+        const minifiedName = maybeToEsmName(builtName);
+        return compileJs(`./${tempBuildDir}`, builtName, `./${distDir}`, {
+          watch: argv.watch,
+          includePolyfills: true,
+          minify: true,
+          minifiedName,
+        });
+      })
+    );
   }
   await postBuildWebPushPublisherFilesVersion();
 }
@@ -286,7 +288,7 @@ async function postBuildWebPushPublisherFilesVersion() {
       // Build Helper Frame HTML
       const [html, js] = await Promise.all([
         fs.readFile(`${basePath}/${fileName}.html`, 'utf8'),
-        fs.readFile(minifiedFile, 'utf8')
+        fs.readFile(minifiedFile, 'utf8'),
       ]);
       const minifiedHtml = html.replace(
         `<!-- [REPLACE-SENTINEL ${fileName}.js] -->`,
