@@ -312,25 +312,37 @@ describes.realWin(
         consentMetadata: {gdprApplies: true, purposeOne: true},
         consentPolicySharedData: null,
       };
-      env.sandbox
+      const consentPromise = Promise.resolve(consentData);
+      const getConsent = env.sandbox
         .stub(consent, 'getConsentDataToForward')
-        .resolves(consentData);
+        .returns(consentPromise);
 
-      const {iframe, impl} = await buildPlayer();
+      const {el, impl} = await buildPlayer();
+      const postMessage = env.sandbox.stub();
+      const source = {postMessage};
+      impl.iframe_ = {contentWindow: source};
       const sendSpy = env.sandbox.spy(impl, 'sendConsentData_');
 
-      // Simulate consent request from iframe (raw object, not JSON)
+      // Simulate consent request from iframe (raw object, not JSON).
       impl.onMessage_({
-        source: iframe.contentWindow,
+        source,
+        origin: 'https://tvid.in',
         data: {type: 'send-consent-data', sentinel: 'amp'},
       });
 
-      expect(sendSpy).to.have.been.calledOnce;
+      // Inspect scalar values so Sinon does not format cross-origin windows
+      // reachable from the player element when reporting an assertion.
+      expect(sendSpy.callCount).to.equal(1);
+      expect(getConsent.callCount).to.equal(1);
+      expect(getConsent.firstCall.args[0]).to.equal(el);
+      expect(getConsent.firstCall.args[1]).to.equal(impl.getConsentPolicy());
 
-      // Wait for the consent promise to resolve
-      await new Promise((r) => setTimeout(r, 0));
-
-      expect(consent.getConsentDataToForward).to.have.been.calledOnce;
+      await consentPromise;
+      expect(postMessage.callCount).to.equal(1);
+      expect(postMessage.firstCall.args).to.deep.equal([
+        {sentinel: 'amp', type: 'consent-data', ...consentData},
+        'https://tvid.in',
+      ]);
     });
 
     it('does not send consent data if iframe is gone', async () => {
