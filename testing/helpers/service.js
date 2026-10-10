@@ -380,11 +380,11 @@ export class ImagePixelVerifier {
     return this.imagePixels_.length > 0;
   }
 
-  verifyRequest(url, referrerPolicy, attributionSrc) {
+  verifyRequest(url, referrerPolicy) {
     const pixel = this.imagePixels_.shift();
     expect(pixel.src).to.equal(url);
     expect(pixel.referrerPolicy).to.equal(referrerPolicy);
-    expect(pixel.attributionSrc).to.equal(attributionSrc);
+    expect(pixel.attributionSrc).to.be.undefined;
   }
 
   verifyRequestMatch(regex) {

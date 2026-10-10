@@ -85,7 +85,6 @@ export class AmpPixel extends BaseElement {
               this.win,
               src,
               this.referrerPolicy_,
-              this.element.getAttribute('attributionsrc'),
               this.element
             );
             dev().info(TAG, 'pixel triggered: ', src);
