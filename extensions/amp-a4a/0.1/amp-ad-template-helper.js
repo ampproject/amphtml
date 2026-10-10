@@ -12,7 +12,7 @@ import {
   getServiceForDoc,
   registerServiceBuilderForDoc,
 } from '../../../src/service-helpers';
-import {parseUrlDeprecated} from '../../../src/url';
+import {isProxyOrigin, parseUrlDeprecated} from '../../../src/url';
 
 /** @private {!{[key: string]: string|boolean}} */
 const TEMPLATE_CORS_CONFIG = {
@@ -114,7 +114,7 @@ export class AmpAdTemplateHelper {
   getTemplateProxyUrl_(url) {
     const cdnUrlSuffix = urls.cdn.slice(8);
     const loc = parseUrlDeprecated(url);
-    return loc.origin.indexOf(cdnUrlSuffix) > 0
+    return isProxyOrigin(loc)
       ? url
       : 'https://' +
           loc.hostname.replace(/-/g, '--').replace(/\./g, '-') +
