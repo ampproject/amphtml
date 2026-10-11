@@ -9,6 +9,7 @@ import {
   getStoryAdMetaTags,
   getStoryAdMetadataFromDoc,
   getStoryAdMetadataFromElement,
+  handleAttributionClick,
   maybeCreateAttribution,
   validateCtaMetadata,
 } from '../story-ad-ui';
@@ -182,6 +183,19 @@ describes.realWin('story-ad-ui', {amp: true}, (env) => {
         expect(element).to.be.null;
         expect(doc.querySelector('.i-amphtml-attribution-host')).not.to.exist;
       });
+    });
+  });
+
+  describe('handleAttributionClick', () => {
+    it('opens the url in a new context without leaking window.opener', () => {
+      const fakeWin = {opener: {}};
+      const openStub = env.sandbox.stub(win, 'open').returns(fakeWin);
+      handleAttributionClick(win, 'https://www.kittens.com/moreinfo');
+      expect(openStub).to.have.been.calledOnce;
+      const [url, target] = openStub.firstCall.args;
+      expect(url).to.equal('https://www.kittens.com/moreinfo');
+      expect(target).to.equal('_blank');
+      expect(fakeWin.opener).to.be.null;
     });
   });
 
