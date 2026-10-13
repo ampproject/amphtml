@@ -689,6 +689,20 @@ export class AmpStory extends AMP.BaseElement {
       false /** callToInitialize */
     );
 
+    this.storeService_.subscribe(
+      StateProperty.CAPTIONS_STATE,
+      (captionsState) => {
+        // We do not want to trigger an analytics event for the initialization of
+        // the captions state.
+        this.analyticsService_.triggerEvent(
+          captionsState
+            ? StoryAnalyticsEvent.STORY_CAPTIONS_ON
+            : StoryAnalyticsEvent.STORY_CAPTIONS_OFF
+        );
+      },
+      false /** callToInitialize */
+    );
+
     this.storeService_.subscribe(StateProperty.ADVANCEMENT_MODE, (mode) => {
       this.variableService_.onVariableUpdate(
         AnalyticsVariable.STORY_ADVANCEMENT_MODE,
