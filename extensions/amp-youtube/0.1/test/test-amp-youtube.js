@@ -9,8 +9,10 @@ import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
+const EXAMPLE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
 const EXAMPLE_VIDEOID_URL = `https://www.youtube.com/embed/${EXAMPLE_VIDEOID}?enablejsapi=1&amp=1&playsinline=1`;
 const EXAMPLE_LIVE_CHANNELID_URL = `https://www.youtube.com/embed/live_stream?channel=${EXAMPLE_LIVE_CHANNELID}&enablejsapi=1&amp=1&playsinline=1`;
+const EXAMPLE_CHANNELID_URL = `https://www.youtube.com/embed/?listType=playlist&list=UU${EXAMPLE_CHANNELID.slice(2)}&enablejsapi=1&amp=1&playsinline=1`;
 const EXAMPLE_NO_COOKIE_VIDEOID_URL = `https://www.youtube-nocookie.com/embed/${EXAMPLE_VIDEOID}?enablejsapi=1&amp=1&playsinline=1`;
 
 describes.realWin(
@@ -256,6 +258,14 @@ describes.realWin(
       expect(iframe.src).to.equal(EXAMPLE_LIVE_CHANNELID_URL);
     });
 
+    it('renders for channel ids', async () => {
+      const yt = await getYt({'data-channelid': EXAMPLE_CHANNELID});
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(EXAMPLE_CHANNELID_URL);
+    });
+
     it('uses privacy-enhanced mode', async () => {
       const yt = await getYt({
         'data-videoid': EXAMPLE_VIDEOID,
@@ -267,12 +277,58 @@ describes.realWin(
       expect(iframe.src).to.equal(EXAMPLE_NO_COOKIE_VIDEOID_URL);
     });
 
-    it('requires data-videoid or data-live-channelid', () => {
+    it('requires exactly one datasource (empty)', () => {
       return allowConsoleError(() => {
         return getYt({}).should.eventually.be.rejectedWith(
-          /Exactly one of data-videoid or data-live-channelid should/
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
         );
       });
+    });
+
+    it('rejects data-videoid and data-channelid together', () => {
+      return allowConsoleError(() => {
+        return getYt({
+          'data-videoid': EXAMPLE_VIDEOID,
+          'data-channelid': EXAMPLE_CHANNELID,
+        }).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
+        );
+      });
+    });
+
+    it('rejects data-live-channelid and data-channelid together', () => {
+      return allowConsoleError(() => {
+        return getYt({
+          'data-live-channelid': EXAMPLE_LIVE_CHANNELID,
+          'data-channelid': EXAMPLE_CHANNELID,
+        }).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
+        );
+      });
+    });
+
+    it('rejects all three datasources together', () => {
+      return allowConsoleError(() => {
+        return getYt({
+          'data-videoid': EXAMPLE_VIDEOID,
+          'data-live-channelid': EXAMPLE_LIVE_CHANNELID,
+          'data-channelid': EXAMPLE_CHANNELID,
+        }).should.eventually.be.rejectedWith(
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should/
+        );
+      });
+    });
+
+    it('uses no-cookie mode for channel embeds', async () => {
+      const yt = await getYt({
+        'data-channelid': EXAMPLE_CHANNELID,
+        'credentials': 'omit',
+      });
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.src).to.contain('youtube-nocookie.com');
+      expect(iframe.src).to.contain('listType=playlist');
+      expect(iframe.src).to.contain('list=UU' + EXAMPLE_CHANNELID.slice(2));
     });
 
     it('adds an img placeholder in prerender mode if source is videoid', async () => {
