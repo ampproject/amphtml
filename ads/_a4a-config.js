@@ -30,6 +30,7 @@ export function getA4ARegistry() {
       'mgid': (win, adTag) =>
         !adTag.hasAttribute('data-container') &&
         !adTag.hasAttribute('data-website'),
+      'insurads': () => true,
       'nws': () => true,
       'smartadserver': () => true,
       'valueimpression': () => true,
