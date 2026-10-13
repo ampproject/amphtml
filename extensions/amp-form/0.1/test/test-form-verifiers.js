@@ -230,5 +230,30 @@ describes.fakeWin('amp-form async verification', {}, (env) => {
         });
       }
     );
+
+    it('does not let a server-supplied name break out of the selector', () => {
+      // Name closes the [name="..."] selector and appends [name="email"],
+      // which would re-target the error onto the email field if unescaped.
+      const injected = 'nomatch"], [name="email';
+      const errorResponse = {
+        json() {
+          return Promise.resolve({
+            verifyErrors: [{name: injected, message: 'injected'}],
+          });
+        },
+      };
+      const xhrSpy = env.sandbox.spy(() =>
+        Promise.reject({response: errorResponse})
+      );
+      const form = getForm(env.win.document);
+      const verifier = getFormVerifier(form, xhrSpy);
+
+      form.email.value = 'test@example.com';
+      const assertEmailClean = () => {
+        expect(form.email.validity.customError).to.be.false;
+        expect(form.email.validationMessage).to.not.equal('injected');
+      };
+      return verifier.onCommit().then(assertEmailClean, assertEmailClean);
+    });
   });
 });
