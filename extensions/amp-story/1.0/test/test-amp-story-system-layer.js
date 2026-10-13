@@ -244,6 +244,196 @@ describes.fakeWin('amp-story system layer', {amp: true}, (env) => {
     expect(systemLayer.getShadowRoot()).to.have.attribute('paused');
   });
 
+  describe('paired button toggle focus restoration', () => {
+    /**
+     * Stubs the system layer's root so activeElement returns the given element.
+     * @param {?Element} activeElement
+     */
+    function stubActiveElement(activeElement) {
+      env.sandbox
+        .stub(systemLayer.systemLayerEl_, 'getRootNode')
+        .returns({activeElement});
+    }
+
+    beforeEach(() => {
+      systemLayer.build();
+    });
+
+    it('should move focus to the nocaptions button when captions are turned off', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_CAPTIONS, true);
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, true);
+
+      const captionsButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-captions-control');
+      const nocaptionsButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-nocaptions-control');
+      const focusSpy = env.sandbox.spy(nocaptionsButton, 'focus');
+      stubActiveElement(captionsButton);
+
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, false);
+
+      expect(focusSpy).to.have.been.calledOnce;
+    });
+
+    it('should move focus to the captions button when captions are turned on', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_CAPTIONS, true);
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, false);
+
+      const captionsButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-captions-control');
+      const nocaptionsButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-nocaptions-control');
+      const focusSpy = env.sandbox.spy(captionsButton, 'focus');
+      stubActiveElement(nocaptionsButton);
+
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, true);
+
+      expect(focusSpy).to.have.been.calledOnce;
+    });
+
+    it('should not move focus on caption state change if no paired button is focused', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_CAPTIONS, true);
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, true);
+
+      const captionsButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-captions-control');
+      const nocaptionsButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-nocaptions-control');
+      const captionsFocusSpy = env.sandbox.spy(captionsButton, 'focus');
+      const nocaptionsFocusSpy = env.sandbox.spy(nocaptionsButton, 'focus');
+      stubActiveElement(win.document.body);
+
+      storeService.dispatch(Action.TOGGLE_CAPTIONS, false);
+
+      expect(captionsFocusSpy).to.not.have.been.called;
+      expect(nocaptionsFocusSpy).to.not.have.been.called;
+    });
+
+    it('should move focus to the unmute button when audio is muted', () => {
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      storeService.dispatch(Action.TOGGLE_MUTED, false);
+
+      const muteButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-mute-audio-control');
+      const unmuteButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-unmute-audio-control');
+      const focusSpy = env.sandbox.spy(unmuteButton, 'focus');
+      stubActiveElement(muteButton);
+
+      storeService.dispatch(Action.TOGGLE_MUTED, true);
+
+      expect(focusSpy).to.have.been.calledOnce;
+    });
+
+    it('should move focus to the mute button when audio is unmuted', () => {
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      storeService.dispatch(Action.TOGGLE_MUTED, true);
+
+      const muteButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-mute-audio-control');
+      const unmuteButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-unmute-audio-control');
+      const focusSpy = env.sandbox.spy(muteButton, 'focus');
+      stubActiveElement(unmuteButton);
+
+      storeService.dispatch(Action.TOGGLE_MUTED, false);
+
+      expect(focusSpy).to.have.been.calledOnce;
+    });
+
+    it('should not move focus on muted state change if no paired button is focused', () => {
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_AUDIO, true);
+      storeService.dispatch(Action.TOGGLE_MUTED, false);
+
+      const muteButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-mute-audio-control');
+      const unmuteButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-unmute-audio-control');
+      const muteFocusSpy = env.sandbox.spy(muteButton, 'focus');
+      const unmuteFocusSpy = env.sandbox.spy(unmuteButton, 'focus');
+      stubActiveElement(win.document.body);
+
+      storeService.dispatch(Action.TOGGLE_MUTED, true);
+
+      expect(muteFocusSpy).to.not.have.been.called;
+      expect(unmuteFocusSpy).to.not.have.been.called;
+    });
+
+    it('should move focus to the play button when the story is paused', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+
+      const pauseButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-pause-control');
+      const playButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-play-control');
+      const focusSpy = env.sandbox.spy(playButton, 'focus');
+      stubActiveElement(pauseButton);
+
+      storeService.dispatch(Action.TOGGLE_PAUSED, true);
+
+      expect(focusSpy).to.have.been.calledOnce;
+    });
+
+    it('should move focus to the pause button when the story is resumed', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+      storeService.dispatch(Action.TOGGLE_PAUSED, true);
+
+      const pauseButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-pause-control');
+      const playButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-play-control');
+      const focusSpy = env.sandbox.spy(pauseButton, 'focus');
+      stubActiveElement(playButton);
+
+      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+
+      expect(focusSpy).to.have.been.calledOnce;
+    });
+
+    it('should not move focus on paused state change if no paired button is focused', () => {
+      storeService.dispatch(Action.TOGGLE_STORY_HAS_PLAYBACK_UI, true);
+      storeService.dispatch(Action.TOGGLE_PAGE_HAS_ELEMENT_WITH_PLAYBACK, true);
+      storeService.dispatch(Action.TOGGLE_PAUSED, false);
+
+      const pauseButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-pause-control');
+      const playButton = systemLayer
+        .getShadowRoot()
+        .querySelector('.i-amphtml-story-play-control');
+      const pauseFocusSpy = env.sandbox.spy(pauseButton, 'focus');
+      const playFocusSpy = env.sandbox.spy(playButton, 'focus');
+      stubActiveElement(win.document.body);
+
+      storeService.dispatch(Action.TOGGLE_PAUSED, true);
+
+      expect(pauseFocusSpy).to.not.have.been.called;
+      expect(playFocusSpy).to.not.have.been.called;
+    });
+  });
+
   describe('localization', () => {
     it('should load the localized aria-labels for buttons if strings are available', async () => {
       getLocalizationService(win.document.body).registerLocalizedStringBundles({
