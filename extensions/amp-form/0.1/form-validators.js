@@ -122,7 +122,11 @@ export class FormValidator {
         input.validationMessage === CUSTOM_PATTERN_ERROR
       ) {
         const pattern = input.getAttribute('pattern');
-        const re = new RegExp(`^${pattern}$`, 'm');
+        // Match the whole value like a native <input pattern>: wrap the author
+        // pattern in a non-capturing group so a top-level alternation stays
+        // anchored, and drop the `m` flag so `^`/`$` don't match at internal
+        // line breaks.
+        const re = new RegExp(`^(?:${pattern})$`);
         const valid = re.test(input.value);
         input.setCustomValidity(valid ? '' : CUSTOM_PATTERN_ERROR);
       }
