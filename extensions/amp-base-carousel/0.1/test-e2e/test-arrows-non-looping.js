@@ -32,7 +32,7 @@ describes.endtoend(
     });
 
     // TODO(#40214): fix flaky test.
-    it.skip('should have the arrows in the correct initial state', async () => {
+    it.only('should have the arrows in the correct initial state', async () => {
       await expect(css(prevArrow, 'opacity')).to.equal('0');
       await expect(css(nextArrow, 'opacity')).to.equal('1');
     });
