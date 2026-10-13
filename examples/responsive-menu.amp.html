@@ -83,9 +83,44 @@
     }
     #sidebar {
       width: 350px;
+      position: relative;
+      background: white;
+      padding-top: 60px;
+    }
+    #sidebar amp-list {
+      position: relative;
+      z-index: 1;
     }
     #sidebar section[expanded] {
       background: white;
+    }
+    #sidebar .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 10px 15px;
+      font-size: 2em;
+      line-height: 1;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid #333;
+      border-radius: 4px;
+      color: #333;
+      cursor: pointer;
+      z-index: 9999;
+      min-width: 40px;
+      min-height: 40px;
+      display: block;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    #sidebar .close-button:hover {
+      color: #000;
+      background: #fff;
+      border-color: #000;
+    }
+    #sidebar .close-button:focus {
+      outline: 2px solid #005fcc;
+      outline-offset: 2px;
     }
     @media (max-width: 1024px) {
       #megamenu {
@@ -144,6 +179,12 @@
   </header>
 
   <amp-sidebar id="sidebar" layout="nodisplay">
+    <button
+        class="close-button"
+        on="tap:sidebar.close"
+        aria-label="Click to close sidebar">
+      ×
+    </button>
     <amp-list layout="fill" src="https://api.myjson.com/bins/11znw2" items="." single-item>
       <template type="amp-mustache">
         <amp-accordion layout="container" expand-single-section>
