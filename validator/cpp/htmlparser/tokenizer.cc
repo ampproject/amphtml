@@ -1,5 +1,13 @@
 #include "cpp/htmlparser/tokenizer.h"
 
+#include <algorithm>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "absl/flags/flag.h"
 #include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/atomutil.h"
@@ -681,6 +689,7 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
   // templates. See: https://amp.dev/documentation/components/amp-mustache/
   bool mustache_inside_section_block = false;
   std::string mustache_section_name = "";
+  bool is_at_attribute_key_start = true;
 
   while (!eof_) {
     char c = ReadByte();
@@ -744,12 +753,21 @@ void Tokenizer::ReadTagAttributeKey(bool template_mode) {
         return;
       }
       case '=':
+        if (is_at_attribute_key_start) {
+          // An unexpected equals sign at the start of the attribute name should
+          // be treated as part of the name. See §13.2.5.32 "Before attribute
+          // name state" in the HTML Living Standard from 2024-02-22 at
+          // https://html.spec.whatwg.org/multipage/parsing.html#before-attribute-name-state.
+          break;
+        }
+        [[fallthrough]];
       case '>': {
         UnreadByte();
         std::get<0>(pending_attribute_).end = raw_.end;
         return;
       }
     }
+    is_at_attribute_key_start = false;
   }
 }
 
@@ -838,7 +856,7 @@ TokenType Tokenizer::Next(bool template_mode) {
     return token_type_;
   }
 
-  if (raw_tag_ != "") {
+  if (!raw_tag_.empty()) {
     if (raw_tag_ == "plaintext") {
       // Read everything up to EOF.
       while (!eof_) {

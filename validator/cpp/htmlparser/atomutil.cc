@@ -1,5 +1,8 @@
 #include "cpp/htmlparser/atomutil.h"
 
+#include <string>
+#include <string_view>
+
 #include "cpp/htmlparser/hash.h"
 
 namespace htmlparser {
@@ -20,7 +23,7 @@ Atom AtomUtil::ToAtom(const std::string& s) {
   table_index = (hash >> 16) & (kNamesHashTable.size() - 1);
   atom_value = kNamesHashTable[table_index];
   atom_len = atom_value & 0xff;
-  if (atom_len == s.size() && ToString(atom_value).compare(s) == 0) {
+  if (atom_len == s.size() && ToString(atom_value) == s) {
     return CastToAtom(atom_value);
   }
 
