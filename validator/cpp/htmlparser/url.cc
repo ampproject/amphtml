@@ -1,5 +1,8 @@
 #include "cpp/htmlparser/url.h"
 
+#include <string>
+#include <string_view>
+
 #include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {

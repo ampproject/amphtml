@@ -1,7 +1,6 @@
 #ifndef CPP_HTMLPARSER_TOKEN_H_
 #define CPP_HTMLPARSER_TOKEN_H_
 
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -59,9 +58,9 @@ struct Attribute {
 // zero if Data is not a known tag name.
 struct Token {
   // Type of token.
-  TokenType token_type;
+  TokenType token_type = TokenType::ERROR_TOKEN;
   // Atom name of this tag.
-  Atom atom;
+  Atom atom = Atom::UNKNOWN;
   // If text node the inner text of the node, if element node the tag name.
   std::string data;
   // Position of this token in html source.

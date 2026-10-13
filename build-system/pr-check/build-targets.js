@@ -294,7 +294,8 @@ const targetMatchers = {
     );
   },
   [Targets.VALIDATOR]: (file) => {
-    if (isOwnersFile(file) || file.startsWith('validator/js/webui/')) {
+    if (isOwnersFile(file) || file.startsWith('validator/js/webui/') ||
+        file.startsWith('validator/cpp/htmlparser/')) {
       return false;
     }
     return (

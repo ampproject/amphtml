@@ -1,5 +1,7 @@
 #include "cpp/htmlparser/casetable.h"
 
+#include <string_view>
+
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/strings.h"
 
