@@ -17,9 +17,13 @@ import {getMode} from '../../../src/mode';
  */
 export let ValidatedHeadDef;
 
-// From validator/validator-main.protoascii
+// From validator/validator-main.protoascii. The validator matches this against
+// the whole attribute value (RE2::FullMatch), so anchor it here too: RegExp.test
+// is a substring match, which would accept any href that merely contains an
+// allowed provider (e.g. https://evil.example/#https://fast.fonts.net/).
 const ALLOWED_FONT_REGEX = new RegExp(
-  'https://cdn\\.materialdesignicons\\.com/' +
+  '^(?:' +
+    'https://cdn\\.materialdesignicons\\.com/' +
     '([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|' +
     'https://cloud\\.typography\\.com/' +
     '[0-9]*/[0-9]*/css/fonts\\.css|' +
@@ -32,7 +36,8 @@ const ALLOWED_FONT_REGEX = new RegExp(
     'https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+' +
     '/css/[0-9a-zA-Z-]+\\.css|' +
     'https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|' +
-    'https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css'
+    'https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css' +
+    ')$'
 );
 
 // If editing please also change:
