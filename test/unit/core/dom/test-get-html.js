@@ -53,4 +53,21 @@ describes.sandboxed('DOM - getHtml', {}, () => {
     const result = getHtml(window, '.no-such-class', ['class', 'id']);
     expect(result).to.equal('');
   });
+
+  it('should escape quotes in attribute values', () => {
+    element.innerHTML =
+      '<div id="wrapper">' +
+      '<a class="c" title="x&quot; onmouseover=&quot;evil()">t</a>' +
+      '</div>';
+    const result = getHtml(window, '#wrapper', ['class', 'title']);
+    expect(result).to.not.include('onmouseover="evil()"');
+    expect(result).to.include('title="x&quot; onmouseover=&quot;evil()"');
+  });
+
+  it('should escape markup in text content', () => {
+    element.innerHTML =
+      '<div id="wrapper">&lt;img src=x onerror=alert(1)&gt;</div>';
+    const result = getHtml(window, '#wrapper', []);
+    expect(result).to.equal('<div>&lt;img src=x onerror=alert(1)&gt;</div>');
+  });
 });
