@@ -210,6 +210,46 @@ for more details.
 
 [/filter]<!-- formats="email" -->
 
+### Show a different image for dark mode
+
+The [`media`](#common-attributes) attribute accepts any valid
+[media query](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries),
+not just screen widths. This means it can also be used with the
+[`prefers-color-scheme`](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+media feature to show a different image depending on whether the user has
+requested a light or dark color scheme. To do this, use two sibling
+`amp-img` elements, each with a `media` attribute that matches one of the
+color schemes:
+
+[example preview="inline" playground="true"]
+
+```html
+<amp-img
+  alt="A view of the sea"
+  src="{{server_for_email}}/static/inline-examples/images/sea.jpg"
+  width="900"
+  height="675"
+  layout="responsive"
+  media="(prefers-color-scheme: light)"
+>
+</amp-img>
+<amp-img
+  alt="A view of the sea"
+  src="{{server_for_email}}/static/inline-examples/images/sea-dark.jpg"
+  width="900"
+  height="675"
+  layout="responsive"
+  media="(prefers-color-scheme: dark)"
+>
+</amp-img>
+```
+
+[/example]
+
+Since browsers that don't support the `prefers-color-scheme` media feature
+won't match either query, always include a `light` variant so that those
+browsers still have an image to display.
+
 [filter formats="websites, stories, ads"]
 
 ### Maintain the aspect ratio for images with unknown dimensions

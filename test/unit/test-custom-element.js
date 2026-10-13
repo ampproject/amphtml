@@ -1385,6 +1385,23 @@ describes.realWin('CustomElement', {amp: true}, (env) => {
         expect(requestMeasureStub).to.be.calledTwice;
       });
 
+      it('should apply media condition for non-viewport media features', () => {
+        matchMedia
+          .withArgs('(prefers-color-scheme: dark)')
+          .returns({matches: true, onchange: null});
+        matchMedia
+          .withArgs('(prefers-color-scheme: light)')
+          .returns({matches: false, onchange: null});
+
+        element1.setAttribute('media', '(prefers-color-scheme: dark)');
+        doc.body.appendChild(element1);
+        expect(element1).to.not.have.class('i-amphtml-hidden-by-media-query');
+
+        element2.setAttribute('media', '(prefers-color-scheme: light)');
+        doc.body.appendChild(element2);
+        expect(element2).to.have.class('i-amphtml-hidden-by-media-query');
+      });
+
       it('should re-apply media condition', () => {
         element1.setAttribute('media', '(min-width: 1px)');
         doc.body.appendChild(element1);
