@@ -54,7 +54,6 @@ export function batchFetchJsonFor(ampdoc, element, options = {}) {
     urlReplacement = UrlReplacementPolicy_Enum.NONE,
     xssiPrefix = undefined,
   } = options;
-  assertHttpsUrl(url, element);
   const xhr = Services.batchedXhrFor(ampdoc.win);
   return requestForBatchFetch(element, url, urlReplacement, refresh)
     .then((data) => {
@@ -83,6 +82,11 @@ export function batchFetchJsonFor(ampdoc, element, options = {}) {
  * @return {!Promise<!FetchRequestDef>}
  */
 export function requestForBatchFetch(element, url, replacement, refresh) {
+  // Enforced here rather than only in batchFetchJsonFor so that callers which
+  // use requestForBatchFetch directly (amp-list and amp-autocomplete SSR) also
+  // reject non-https URLs.
+  assertHttpsUrl(url, element);
+
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(element);
   const promise =

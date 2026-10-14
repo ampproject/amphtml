@@ -5,6 +5,7 @@ import {user} from '#utils/log';
 import {
   UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../src/batched-json';
 
 describes.sandboxed('batchFetchJsonFor', {}, (env) => {
@@ -97,6 +98,29 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
         expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;
         expect(userError).to.not.be.called;
       });
+    });
+  });
+
+  describe('https enforcement', () => {
+    const none = UrlReplacementPolicy_Enum.NONE;
+
+    it('requestForBatchFetch throws for a non-https src', () => {
+      const el = element('http://data.com');
+      expect(() =>
+        requestForBatchFetch(el, el.getAttribute('src'), none, false)
+      ).to.throw(/https/);
+    });
+
+    it('requestForBatchFetch does not throw for an https src', () => {
+      const el = element('https://data.com');
+      expect(() =>
+        requestForBatchFetch(el, el.getAttribute('src'), none, false)
+      ).to.not.throw();
+    });
+
+    it('batchFetchJsonFor throws for a non-https src', () => {
+      const el = element('http://data.com');
+      expect(() => batchFetchJsonFor(ampdoc, el)).to.throw(/https/);
     });
   });
 });
