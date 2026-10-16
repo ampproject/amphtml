@@ -410,6 +410,16 @@ describes.sandboxed('SanitizerImpl', {}, (env) => {
       expect(pixel.getAttribute('src')).to.be.null;
     });
 
+    it('should not allow event handler attributes on AMP tags', () => {
+      const img = win.document.createElement('amp-img');
+      s.setAttribute(img, 'onclick', 'alert(1)');
+      expect(img.getAttribute('onclick')).to.be.null;
+
+      const layout = win.document.createElement('amp-layout');
+      s.setAttribute(layout, 'onmouseover', 'alert(1)');
+      expect(layout.getAttribute('onmouseover')).to.be.null;
+    });
+
     it('should not allow changes to other AMP tags', () => {
       const analytics = win.document.createElement('amp-analytics');
       s.setAttribute(analytics, 'data-credentials', 'include');
