@@ -551,6 +551,34 @@ describes.realWin(
             [`aas-${AD_CLIENT_ID}`]: false,
           });
         });
+
+        it("doesn't write data from a source other than the ad iframe", async () => {
+          const data = {
+            'googMsgType': 'adsense-settings',
+            'adClient': AD_CLIENT_ID,
+            'enableAutoAdSize': '1',
+          };
+          // A message from a window other than the ad iframe is ignored...
+          win.dispatchEvent(
+            new MessageEvent('message', {
+              data: JSON.stringify(data),
+              source: win,
+            })
+          );
+          // ...while a message from the ad iframe is still honored.
+          win.dispatchEvent(
+            new MessageEvent('message', {
+              data: JSON.stringify({...data, 'enableAutoAdSize': '0'}),
+              source: fakeIframe.contentWindow,
+            })
+          );
+
+          await promise;
+
+          expect(storageContent).to.deep.equal({
+            [`aas-${AD_CLIENT_ID}`]: false,
+          });
+        });
       });
     });
   }
