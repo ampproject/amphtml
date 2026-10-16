@@ -495,6 +495,16 @@ export function mergeObjects(from, to, opt_predefinedVendorConfig) {
   );
 
   for (const property in from) {
+    // Never merge keys that can reach Object.prototype. A remote or inline
+    // config returning {"__proto__": {...}} would otherwise recurse into the
+    // prototype and pollute it for every object on the page.
+    if (
+      property === '__proto__' ||
+      property === 'constructor' ||
+      property === 'prototype'
+    ) {
+      continue;
+    }
     userAssert(
       opt_predefinedVendorConfig || property != 'iframePing',
       'iframePing config is only available to vendor config.'
