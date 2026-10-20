@@ -1,19 +1,7 @@
 # Project Metrics
 
-## Absolute Code Coverage
+The historical AMP project metrics service is no longer available. Its chart
+endpoints now return HTTP 404, so the retired charts are no longer embedded
+here.
 
-Test coverage for the repository as computed by CodeCov
-
-![Absolute Code Coverage](https://amp-project-metrics.appspot.com/api/plot/AbsoluteCoverageMetric.png)
-
-## Cherrypick Issue Count
-
-Number of cherry-pick issues in the last 90 days
-
-![Cherrypick Issue Count](https://amp-project-metrics.appspot.com/api/plot/CherrypickIssueCountMetric.png)
-
-## Release Granularity
-
-Average commits per release over the last 90 days
-
-![Release Granularity](https://amp-project-metrics.appspot.com/api/plot/ReleaseGranularityMetric.png)
+For current repository coverage, see the [AMP HTML Codecov report](https://codecov.io/gh/ampproject/amphtml/).
