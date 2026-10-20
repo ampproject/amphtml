@@ -187,6 +187,19 @@ describes.realWin('head validation', {amp: true}, (env) => {
       expect(preloadStub).not.to.be.called;
     });
 
+    it('does not allow a foreign origin that embeds an allowlisted provider substring', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.preconnectFor(env.win),
+        'preload'
+      );
+      head.innerHTML = `
+        <link href="https://evil.example/x.css#https://fast.fonts.net/" rel="stylesheet">
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('link')).not.to.exist;
+      expect(preloadStub).not.to.be.called;
+    });
+
     it('keeps amp styles', () => {
       head.innerHTML = `
         <style amp-custom></style>
