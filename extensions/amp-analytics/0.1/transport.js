@@ -68,11 +68,6 @@ export class Transport {
 
     /** @private {boolean} */
     this.isInabox_ = getMode(this.win_).runtime == 'inabox';
-
-    /** @private {string|undefined} */
-    this.attributionSrc_ = /** @type {string|undefined} */ (
-      this.options_['attributionsrc']
-    );
   }
 
   /**
@@ -141,7 +136,6 @@ export class Transport {
         getRequest(false),
         suppressWarnings,
         /** @type {string|undefined} */ (this.referrerPolicy_),
-        /** @type {string|undefined} */ (this.attributionSrc_),
         this.ampdoc_
       );
       return;
@@ -248,7 +242,6 @@ export class Transport {
    * @param {!RequestDef} request
    * @param {boolean} suppressWarnings
    * @param {string|undefined} referrerPolicy
-   * @param {string|undefined} attributionSrc
    * @param {!Element|!./service/ampdoc-impl.AmpDoc} elementOrAmpDoc Whether services are provided by an
    *     element.
    */
@@ -257,7 +250,6 @@ export class Transport {
     request,
     suppressWarnings,
     referrerPolicy,
-    attributionSrc,
     elementOrAmpDoc
   ) {
     if (!win) {
@@ -267,7 +259,6 @@ export class Transport {
       win,
       request.url,
       referrerPolicy,
-      attributionSrc,
       elementOrAmpDoc
     );
     loadPromise(image)

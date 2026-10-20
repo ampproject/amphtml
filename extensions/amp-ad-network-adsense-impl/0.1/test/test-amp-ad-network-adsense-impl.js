@@ -15,7 +15,6 @@ import {utf8Decode, utf8Encode} from '#core/types/string/bytes';
 import {toWin} from '#core/window';
 
 import {forceExperimentBranch, toggleExperiment} from '#experiments';
-import * as experiments from '#experiments';
 
 import {Services} from '#service';
 
@@ -1686,26 +1685,6 @@ describes.realWin(
         const letCreativeTriggerRenderStart =
           impl.letCreativeTriggerRenderStart();
         expect(letCreativeTriggerRenderStart).to.equal(false);
-      });
-    });
-
-    describe('#divertExperiments', () => {
-      it('should have correctly formatted experiment map', () => {
-        const randomlySelectUnsetExperimentsStub = env.sandbox.stub(
-          experiments,
-          'randomlySelectUnsetExperiments'
-        );
-        randomlySelectUnsetExperimentsStub.returns({});
-        impl.divertExperiments();
-        const experimentMap =
-          randomlySelectUnsetExperimentsStub.firstCall.args[1];
-        Object.keys(experimentMap).forEach((key) => {
-          expect(key).to.be.a('string');
-          const {branches} = experimentMap[key];
-          expect(branches).to.exist;
-          expect(branches).to.be.a('array');
-          branches.forEach((branch) => expect(branch).to.be.a('string'));
-        });
       });
     });
   }
