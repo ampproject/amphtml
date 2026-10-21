@@ -443,7 +443,7 @@ const adConfig = jsonConfiguration({
 
   'colombia': {
     prefetch: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
-    clientIdScope: 'AMP_ECID_COLOMBIA',
+    clientIdScope: 'site-user-id-cookie-fallback-name',
   },
 
   'colombiafeed': {
