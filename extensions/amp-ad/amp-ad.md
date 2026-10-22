@@ -363,6 +363,7 @@ See [amp-ad rules](validator-amp-ad.protoascii) in the AMP validator specificati
 -   [Giraff](../../ads/vendors/giraff.md)
 -   [Glomex](../../ads/vendors/glomex.md)
 -   [GMOSSP](../../ads/vendors/gmossp.md)
+-   [gsrv](../../ads/vendors/gsrv.md)
 -   [GumGum](../../ads/vendors/gumgum.md)
 -   [Holder](../../ads/vendors/holder.md)
 -   [iBillboard](../../ads/vendors/ibillboard.md)

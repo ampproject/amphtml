@@ -643,6 +643,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  'gsrv': {
+    renderStartImplemented: true,
+  },
+
   'gumgum': {
     prefetch: 'https://js.gumgum.com/slot.js',
     renderStartImplemented: true,
