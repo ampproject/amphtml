@@ -1,38 +1,56 @@
 {
   "requests": {
     "addDevice": "https://${dataCenter}.moengage.com/v2/device/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}&isAmp=true",
-    "event": "https://${dataCenter}.moengage.com/v2/report/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}"
+    "event": "https://${dataCenter}.moengage.com/v2/report/add?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}",
+    "eventV2": "https://${dataCenter}.moengage.com/v2/sdk/report/${appId}?os=${os}&app_id=${appId}&sdk_ver=${sdk_ver}&app_ver=${app_ver}&device_tz=${device_tz}&os_platform=${os_platform}&unique_id=${unique_id}&device_ts=${timestamp}"
   },
   "vars": {
     "os": "mweb",
     "sdk_ver": "0.0.0",
-    "app_ver": "1",
+    "app_ver": "1.0",
     "device_tz": "${timezone}",
     "os_platform": "${userAgent}",
     "unique_id": "${clientId(moe_uuid)}",
-    "dataCenter": "sdk-01"
+    "dataCenter": "sdk-01",
+    "integration_type": "AMP"
   },
   "extraUrlParams": {
-    "a": {
-      "timestamp": "${timestamp}",
-      "URL": "${ampdocUrl}"
-    },
+    "identifiers": {},
     "meta": {
-      "bid": "${random}"
-    },
-    "url": "${ampdocUrl}"
+      "bid": "${random}",
+      "request_time": "${timestamp}",
+      "integration_type": "${integration_type}"
+    }
   },
   "triggers": {
     "pageViewed": {
       "on": "visible",
-      "request": ["addDevice", "event"],
+      "request": "eventV2",
       "extraUrlParams": {
-        "e": "MOE_PAGE_VIEWED"
+        "viewsCount": 1,
+        "viewsInfo": [
+          {
+            "EVENT_ACTION": "MOE_PAGE_VIEWED",
+            "EVENT_ATTRS": {
+              "timestamp": "${timestamp}",
+              "moe_logged_in_status": false,
+              "moe_first_visit": false,
+              "URL": "${sourceUrl}"
+            },
+            "EVENT_G_TIME": "${timestamp}",
+            "EVENT_L_TIME": "${timestamp}"
+          }
+        ]
       }
+    },
+    "deviceRegister": {
+      "on": "visible",
+      "request": "addDevice"
     }
   },
   "transport": {
     "xhrpost": true,
+    "beacon": true,
     "useBody": true
   }
 }

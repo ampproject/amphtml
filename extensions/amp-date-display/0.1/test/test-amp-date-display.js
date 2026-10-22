@@ -115,7 +115,7 @@ describes.realWin(
         timeZoneNameShort: 'EST',
       },
       'ja-JP': {
-        timeZoneName: 'アメリカ東部標準時',
+        timeZoneName: '米国東部標準時',
         timeZoneNameShort: 'GMT-5',
       },
       'ar-EG': {
