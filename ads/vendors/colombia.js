@@ -12,6 +12,10 @@ export function colombia(global, data) {
     'clmb_divid',
     'loadingStrategy',
   ]);
+  const atdcUid = global.context.clientId
+    ? global.context.clientId + '-0000000'
+    : '';
+
   // push the two object into the '_colombia' global
   (global._colombia = global._colombia || []).push({
     clmbslot: data.clmb_slot,
@@ -20,6 +24,7 @@ export function colombia(global, data) {
     clmbdivid: data.clmb_divid,
     gam: data.gam,
     clmbcustom: data.clmb_custom,
+    atdcUid,
   });
   // install observation on entering/leaving the view
   global.context.observeIntersection(function (newrequest) {
