@@ -40,6 +40,16 @@ AMP is an open source project, and we'd love your help making it better!
 -   [Let us know about bugs](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#report-a-bug), and [file feature requests](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#make-a-suggestion) to suggest improvements.
 -   AMP accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
 
+## Build and Development
+
+This project uses a custom build system. The main commands are:
+
+-   `npm install`: Installs all the dependencies.
+-   `node amp.js build`: Builds the application.
+-   `node amp.js serve`: Runs the application in development mode.
+
+The development server will be available at `http://localhost:8000`.
+
 ## Want to help make AMP better?
 
 -   [docs/contributing.md](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md) has information on how you can help improve AMP, including [ongoing participation](https://github.com/ampproject/amphtml/blob/main/docs/contributing.md#ongoing-participation) through Slack, weekly design reviews, etc.
