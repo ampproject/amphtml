@@ -42,7 +42,7 @@ FAIL
 |      <!-- Invalid: data-videoid and data-live-channelid both missing. -->
 |      <amp-youtube width="480" height="270"></amp-youtube>
 >>     ^~~~~~~~~
-amp-youtube/1.0/test/validator-amp-youtube.html:42:4 The tag 'amp-youtube' is missing a mandatory attribute - pick one of ['data-live-channelid', 'data-videoid']. (see https://amp.dev/documentation/components/amp-youtube)
+amp-youtube/1.0/test/validator-amp-youtube.html:42:4 The tag 'amp-youtube' is missing a mandatory attribute - pick one of ['data-live-channelid', 'data-videoid', 'data-channelid']. (see https://amp.dev/documentation/components/amp-youtube)
 |
 |      <!-- Invalid: dimensions are missing. -->
 |      <amp-youtube data-videoid="dQw4w9WgXcQ"> </amp-youtube>
@@ -62,7 +62,7 @@ amp-youtube/1.0/test/validator-amp-youtube.html:48:4 The attribute 'data-videoid
 |      <!-- Invalid: cannot have both data-videoid and data-live-channelid -->
 |      <amp-youtube
 >>     ^~~~~~~~~
-amp-youtube/1.0/test/validator-amp-youtube.html:56:4 Mutually exclusive attributes encountered in tag 'amp-youtube' - pick one of ['data-live-channelid', 'data-videoid']. (see https://amp.dev/documentation/components/amp-youtube)
+amp-youtube/1.0/test/validator-amp-youtube.html:56:4 Mutually exclusive attributes encountered in tag 'amp-youtube' - pick one of ['data-live-channelid', 'data-videoid', 'data-channelid']. (see https://amp.dev/documentation/components/amp-youtube)
 |        width="480"
 |        height="270"
 |        data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q"
