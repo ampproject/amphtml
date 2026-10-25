@@ -1220,7 +1220,8 @@ TEST(ValidatorTest, RulesMakeSense) {
                         HtmlFormat::UNKNOWN_CODE),
               html_format.cend())
         << "tagSpec.htmlFormat should never contain UNKNOWN_CODE"
-        << ":\n" << tag_spec.DebugString();
+        << ":\n"
+        << tag_spec;
 
     EXPECT_TRUE(tag_spec.has_tag_name());
     EXPECT_TRUE(RE2::PartialMatch(tag_spec.tag_name(), tag_name_regex));
@@ -1562,12 +1563,12 @@ TEST(ValidatorTest, RulesMakeSense) {
     }
 
     for (const auto& attr_spec : tag_spec.attrs()) {
-      EXPECT_TRUE(attr_spec.has_name()) << attr_spec.DebugString();
+      EXPECT_TRUE(attr_spec.has_name()) << attr_spec;
       // Attribute Spec names are matched against lowercased attributes,
       // so the rules *must* also be lower case or non-cased.
       EXPECT_TRUE(RE2::FullMatch(attr_spec.name(), RE2("[^A-Z]+")))
-          << attr_spec.DebugString();
-      EXPECT_NE(attr_spec.name(), "[style]") << attr_spec.DebugString();
+          << attr_spec;
+      EXPECT_NE(attr_spec.name(), "[style]") << attr_spec;
       if (attr_spec.has_value_url()) {
         for (const std::string& protocol : attr_spec.value_url().protocol()) {
           // UrlSpec protocol is matched against lowercased protocol names,
@@ -1582,27 +1583,24 @@ TEST(ValidatorTest, RulesMakeSense) {
             if (protocol == "http" &&
                 attr_spec.value_url().has_allow_relative()) {
               EXPECT_TRUE(attr_spec.value_url().allow_relative())
-                  << attr_spec.value_url().DebugString();
+                  << attr_spec.value_url();
             }
           }
         }
       }
       if (attr_spec.has_value_regex()) {
-        EXPECT_TRUE(RE2(attr_spec.value_regex()).ok())
-            << attr_spec.DebugString();
+        EXPECT_TRUE(RE2(attr_spec.value_regex()).ok()) << attr_spec;
       }
       if (attr_spec.has_value_regex_casei()) {
-        EXPECT_TRUE(RE2(attr_spec.value_regex_casei()).ok())
-            << attr_spec.DebugString();
+        EXPECT_TRUE(RE2(attr_spec.value_regex_casei()).ok()) << attr_spec;
       }
       if (attr_spec.has_disallowed_value_regex()) {
-        EXPECT_TRUE(RE2(attr_spec.disallowed_value_regex()).ok())
-            << attr_spec.DebugString();
+        EXPECT_TRUE(RE2(attr_spec.disallowed_value_regex()).ok()) << attr_spec;
       }
       if (attr_spec.has_value_url()) {
         EXPECT_GT(attr_spec.value_url().protocol().size(), 0)
             << "value_url must have at least one protocol\n"
-            << attr_spec.DebugString();
+            << attr_spec;
       }
       int num_values = 0;
       if (!attr_spec.value().empty()) {
@@ -1627,12 +1625,12 @@ TEST(ValidatorTest, RulesMakeSense) {
       if (attr_spec.name() == "id" && num_values == 0) {
         EXPECT_TRUE(attr_spec.has_disallowed_value_regex())
             << "'id' attribute must have 'disallowed_value_regex' set\n"
-            << attr_spec.DebugString();
+            << attr_spec;
       }
       if (attr_spec.name() == "name" && num_values == 0) {
         EXPECT_TRUE(attr_spec.has_disallowed_value_regex())
             << "'name' attribute must have 'disallowed_value_regex' set\n"
-            << attr_spec.DebugString();
+            << attr_spec;
       }
       if (attr_spec.has_deprecation()) {
         EXPECT_TRUE(attr_spec.has_deprecation_url());

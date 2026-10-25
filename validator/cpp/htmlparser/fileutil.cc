@@ -3,10 +3,15 @@
 #include <glob.h>
 
 #include <algorithm>
+#include <cctype>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <variant>
+#include <vector>
 
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/strings.h"

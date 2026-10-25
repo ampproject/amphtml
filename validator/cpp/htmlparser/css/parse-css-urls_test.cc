@@ -1,13 +1,14 @@
 #include "cpp/htmlparser/css/parse-css-urls.h"
 
 #include <ostream>
+#include <string>
+#include <vector>
 
 #include <gmock/gmock.h>
 #include "gtest/gtest.h"
 #include "absl/strings/str_cat.h"
 #include "cpp/htmlparser/strings.h"
 
-using testing::Eq;
 using testing::Pointwise;
 
 namespace htmlparser::css::url {

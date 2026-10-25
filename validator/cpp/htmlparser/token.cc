@@ -1,5 +1,7 @@
 #include "cpp/htmlparser/token.h"
 
+#include <string>
+
 #include "cpp/htmlparser/strings.h"
 
 namespace htmlparser {

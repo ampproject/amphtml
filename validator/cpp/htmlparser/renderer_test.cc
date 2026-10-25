@@ -1,11 +1,14 @@
 #include "cpp/htmlparser/renderer.h"
 
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/parser.h"
 
-using namespace std::string_literals;
+using namespace std::string_literals;  // NOLINT(build/namespaces)
 
 namespace htmlparser {
 
@@ -167,4 +170,4 @@ TEST(RendererTest, NullCharsTest) {
     htmlparser::CheckParseRenderOutput(
         html_sources.at(i), rendered_outputs.at(i));
   }
-};
+}
