@@ -1,7 +1,11 @@
 #include "cpp/htmlparser/json/types.h"
 
 #include <cmath>
+#include <functional>
+#include <string>
+#include <string_view>
 #include <type_traits>
+#include <utility>
 
 #include "gtest/gtest.h"
 

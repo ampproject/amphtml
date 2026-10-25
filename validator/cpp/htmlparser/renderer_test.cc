@@ -1,11 +1,14 @@
 #include "cpp/htmlparser/renderer.h"
 
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/parser.h"
 
-using namespace std::string_literals;
+using namespace std::string_literals;  // NOLINT(build/namespaces)
 
 namespace htmlparser {
 
@@ -78,7 +81,10 @@ TEST(RendererTest, NullCharsTest) {
       "<html><head></head><body><tag1><tag2 /><p></p></tag1><div></div>"
           "</body></html>",
       "<dd><dd><dt><dt><dd><li><li>",
-      "<ul><li><div id='foo'/>A</li><li>B<div>C</div></li></ul>"};
+      "<ul><li><div id='foo'/>A</li><li>B<div>C</div></li></ul>",
+      "<xmp><rawtext!23></xmp>",
+      "<svg><style>&lt;/style&gt;&lt;script&gt;oops&lt;/script&gt;",
+      "<math><mfrac><iframe>&lt;abc&gt;"};
 
   std::vector<std::string> rendered_outputs = {
       "<html><head></head><body>fillertext<table></table></body></html>",
@@ -159,7 +165,13 @@ TEST(RendererTest, NullCharsTest) {
       "<html><head></head><body><dd></dd><dd></dd><dt></dt><dt></dt><dd><li>"
           "</li><li></li></dd></body></html>",
       "<html><head></head><body><ul><li><div id=\"foo\">A</div></li><li>B<div>"
-          "C</div></li></ul></body></html>"};
+          "C</div></li></ul></body></html>",
+      "<html><head></head><body><xmp><rawtext!23></xmp></body></html>",
+      "<html><head></head><body><svg><style>"
+          "&lt;/style&gt;&lt;script&gt;oops&lt;/script&gt;</style>"
+          "</svg></body></html>",
+      "<html><head></head><body><math><mfrac><iframe>&lt;abc&gt;</iframe>"
+          "</mfrac></math></body></html>"};
 
   EXPECT_EQ(html_sources.size(), rendered_outputs.size());
 
@@ -167,4 +179,4 @@ TEST(RendererTest, NullCharsTest) {
     htmlparser::CheckParseRenderOutput(
         html_sources.at(i), rendered_outputs.at(i));
   }
-};
+}

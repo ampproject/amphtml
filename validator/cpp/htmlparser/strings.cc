@@ -3,8 +3,13 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <ios>  // For std::hex
+#include <optional>
 #include <sstream>
+#include <string>
 #include <tuple>
+#include <utility>
+
 #include "cpp/htmlparser/casetable.h"
 #include "cpp/htmlparser/entity.h"
 #include "cpp/htmlparser/whitespacetable.h"
@@ -15,7 +20,7 @@ namespace htmlparser {
 // assumed Windows-1252 encoding.
 // https://html.spec.whatwg.org/multipage/syntax.html#consume-a-character-reference
 constexpr std::array<char32_t, 32> kReplacementTable{
-    L'\u20AC', // First entry is what 0x80 should be replaced with.
+    L'\u20AC',  // First entry is what 0x80 should be replaced with.
     L'\u0081',
     L'\u201A',
     L'\u0192',
@@ -46,7 +51,7 @@ constexpr std::array<char32_t, 32> kReplacementTable{
     L'\u0153',
     L'\u009D',
     L'\u017E',
-    L'\u0178', // Last entry is 0x9F.
+    L'\u0178',  // Last entry is 0x9F.
     // 0x00->L'\uFFFD' is handled programmatically.
     // 0x0D->L'\u000D' is a no-op.
 };
@@ -303,7 +308,7 @@ std::optional<char32_t> Strings::DecodeUtf8Symbol(std::string_view* s) {
     if (code_point < 0x0800) {
       return std::nullopt;
     }
-    // Check if this is codepoint is low surrgates.
+    // Check if this is codepoint is low surrogates.
     if (code_point >= 0xd800 && code_point <= 0xdfff) {
       return std::nullopt;
     }
@@ -645,7 +650,7 @@ bool Strings::EqualFold(std::string_view l, std::string_view r) {
         if ((l_char | 0x20) != (r_char | 0x20)) {
           return false;
         }
-      } else if (l_char != r_char) { // Compare other ascii character as-is.
+      } else if (l_char != r_char) {  // Compare other ascii character as-is.
         return false;
       }
 
@@ -771,7 +776,7 @@ namespace {
 // attribute should be true if passing an attribute value.
 std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     bool attribute) {
-  std::string s = b->substr(src);
+  std::string_view s = std::string_view(*b).substr(src);
   if (s.size() <= 1) {
     b->at(dst) = b->at(src);
     return std::pair<int, int>(dst + 1, src + 1);
@@ -780,7 +785,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
   // i starts at 1 because we already know that s[0] == '&'.
   std::size_t i = 1;
   if (s.at(i) == '#') {
-    if (s.size() <= 3) {  // We need to have at least  "&#.".
+    if (s.size() < 3) {  // We need to have at least  "&#.".
       b->at(dst) = b->at(src);
       return std::pair<int, int>(dst + 1, src + 1);
     }
@@ -788,6 +793,10 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     auto c = s.at(i);
     bool hex = false;
     if (c == 'x' || c == 'X') {
+      if (s.size() == 3) {
+        b->at(dst) = b->at(src);
+        return std::pair<int, int>(dst + 1, src + 1);
+      }
       hex = true;
       i++;
     }
@@ -817,7 +826,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
       break;
     }
 
-    if (i <= 3) {  // No characters matched.
+    if (i < 3 || (hex && i < 4)) {  // No characters matched.
       b->at(dst) = b->at(src);
       return std::pair<int, int>(dst + 1, src + 1);
     }
@@ -826,7 +835,7 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
       // Replace characters from Windows-1252 with UTF-8 equivalents.
       x = kReplacementTable[x - 0x80];
     } else if (x == 0 || (0xD800 <= x && x <= 0xDFFF) || x > 0x10FFFF) {
-      // Replace invalid characters with the replacement chracter.
+      // Replace invalid characters with the replacement character.
       x = L'\uFFFD';
     }
 
@@ -839,23 +848,23 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
     }
   }
 
-  // Consume the maximum number of chracters possible, with the consumed
+  // Consume the maximum number of characters possible, with the consumed
   // characters matching one of the named references.
   while (i < s.size()) {
     auto c = s.at(i);
     i++;
     // Lower-cased characters are more common in entities, so we check for
     // them first.
-   if (Strings::IsCharAlphabet(c) || Strings::IsDigit(c)) {
+    if (Strings::IsCharAlphabet(c) || Strings::IsDigit(c)) {
      continue;
-   }
-   if (c != ';') {
-     i--;
-   }
-   break;
+    }
+    if (c != ';') {
+      i--;
+    }
+    break;
   }
 
-  std::string entityName = s.substr(1, i - 1);
+  std::string_view entityName = s.substr(1, i - 1);
   auto encoded_bytes = EntityLookup(entityName);
   if (entityName.empty()) {
     // No-op.
@@ -900,7 +909,6 @@ std::pair<int, int> UnescapeEntity(std::string* b, int dst, int src,
 
 void CaseTransformInternal(bool to_upper, std::string* s) {
   for (std::size_t i = 0; i < s->size(); ++i) {
-
     uint8_t code_point = s->at(i) & 0xff;
 
     // ASCII characters first.
@@ -953,7 +961,7 @@ bool ExtractChars(std::string_view str, std::vector<char32_t>* chars) {
   while (!str.empty()) {
     uint8_t c = str.front() & 0xff;
 
-    // ASCII chracters first.
+    // ASCII characters first.
     if (IsOneByteASCIIChar(c)) {
       chars->push_back(c);
       str.remove_prefix(1);

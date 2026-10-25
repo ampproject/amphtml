@@ -8,7 +8,10 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 #
 # bazel build --repo_env=CC=clang --cxxopt='-std=c++17' <build_target>
 
-package(default_visibility = ["//visibility:public"])
+package(
+    default_compatible_with = ["//buildenv/target:non_prod"],
+    default_visibility = ["//visibility:public"],
+)
 
 licenses(["notice"])
 
@@ -195,10 +198,10 @@ cc_library(
     hdrs = [
         "logging.h",
     ],
+    copts = ["-std=c++17"],
     deps = [
         ":glog_polyfill",
     ],
-    copts = ["-std=c++17"],
 )
 
 # Defines token type and token structures, used during tokenization.
@@ -463,6 +466,7 @@ cc_test(
         "tokenizer_test.cc",
     ],
     deps = [
+        ":atom",
         ":token",
         ":tokenizer",
         "@com_google_googletest//:gtest_main",
@@ -551,7 +555,7 @@ cc_test(
         ":strings",
         ":testconstants",
         ":tokenizer",
-        "@com_google_googletest//:gtest_main",
         "@com_google_absl//absl/flags:flag",
+        "@com_google_googletest//:gtest_main",
     ],
 )
