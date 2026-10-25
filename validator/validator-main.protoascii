@@ -3884,6 +3884,23 @@ attr_lists: {
         "{{\\^"  # Section delimiters are disallowed.
   }
 }
+# <amp-blurhash>
+tag: "AMP-BLURHASH"
+spec_name: "amp-blurhash"
+spec_url: "https://amp.dev/documentation/components/amp-blurhash"
+html_format: AMP
+requires_extension: "amp-blurhash"
+attr_list: {
+  attrs: {
+    name: "hash"
+    mandatory: true
+    value_regex: "[A-Za-z0-9+/]{6,}"
+  }
+  attrs: { name: "width" mandatory: true value_regex: "[0-9]+" }
+  attrs: { name: "height" mandatory: true value_regex: "[0-9]+" }
+  attrs: { name: "punch" value_regex: "[0-9]+(\\.[0-9]+)?" }
+}
+
 # Same as above except that the attribute is not mandatory.
 attr_lists: {
   name: "optional-src-amp4email"
