@@ -204,6 +204,12 @@ export class ResponsiveState {
     const win = getWin(element);
 
     const listener = (event) => {
+      // Only honor settings posted by the ad iframe itself. Without this any
+      // frame that can post to the host window could spoof the message and
+      // persist a chosen setting for the (publicly known) ad client id.
+      if (!iframe || event.source !== iframe.contentWindow) {
+        return;
+      }
       const data = getData(event);
       let dataList = null;
       if (typeof data == 'string') {
