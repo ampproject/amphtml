@@ -1460,6 +1460,56 @@ describes.realWin('AmpStoryPlayer', {amp: false}, (env) => {
       });
     });
 
+    it('should dispatch amp-story-captions-state when story captions are turned on', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await macroTask();
+
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-captions-state', spy);
+
+      const fakeData = {state: 'CAPTIONS_STATE', value: true};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await macroTask();
+
+      expect(spy).to.have.been.calledWithMatch({
+        type: 'amp-story-captions-state',
+        detail: {
+          captions: true,
+        },
+      });
+    });
+
+    it('should dispatch amp-story-captions-state when story captions are turned off', async () => {
+      const playerEl = win.document.createElement('amp-story-player');
+      attachPlayerWithStories(playerEl, 1);
+
+      const player = new AmpStoryPlayer(win, playerEl);
+
+      await player.load();
+      await macroTask();
+
+      const spy = env.sandbox.spy();
+      playerEl.addEventListener('amp-story-captions-state', spy);
+
+      const fakeData = {state: 'CAPTIONS_STATE', value: false};
+      fireHandler['documentStateUpdate']('documentStateUpdate', fakeData);
+
+      await macroTask();
+
+      expect(spy).to.have.been.calledWithMatch({
+        type: 'amp-story-captions-state',
+        detail: {
+          captions: false,
+        },
+      });
+    });
+
     it('should react to CURRENT_PAGE_ID events', async () => {
       const playerEl = win.document.createElement('amp-story-player');
       attachPlayerWithStories(playerEl, 1);
