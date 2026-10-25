@@ -192,6 +192,11 @@ export class Purifier {
       if (!allowlistedForTag && !tag.startsWith('amp-')) {
         return false;
       }
+      // DOMPurify would have rejected event handler attributes, so they need
+      // to be checked here since its verdict is overridden for AMP elements.
+      if (attr.startsWith('on') && attr != 'on') {
+        return false;
+      }
     }
     const doc = node.ownerDocument
       ? node.ownerDocument
