@@ -4,7 +4,7 @@
   position: absolute;
   bottom: 0 !important;
   left: 0 !important;
-  max-height: 15px !important;
+  max-height: 0.9375rem !important;
   /* 1 greater than cta layer. */
   z-index: 4 !important;
 }
