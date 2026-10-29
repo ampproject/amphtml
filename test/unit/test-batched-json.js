@@ -5,6 +5,7 @@ import {user} from '#utils/log';
 import {
   UrlReplacementPolicy_Enum,
   batchFetchJsonFor,
+  requestForBatchFetch,
 } from '../../src/batched-json';
 
 describes.sandboxed('batchFetchJsonFor', {}, (env) => {
@@ -96,6 +97,32 @@ describes.sandboxed('batchFetchJsonFor', {}, (env) => {
         expect(fetchJson).to.be.calledWith('https://data.com?x=abc&y=BAR');
         expect(urlReplacements.collectDisallowedVarsSync).to.not.be.called;
         expect(userError).to.not.be.called;
+      });
+    });
+  });
+
+  describe('https enforcement', () => {
+    const none = UrlReplacementPolicy_Enum.NONE;
+
+    it('requestForBatchFetch rejects a non-https src', () => {
+      expectAsyncConsoleError(/https/);
+      const el = element('http://data.com');
+      return expect(
+        requestForBatchFetch(el, el.getAttribute('src'), none, false)
+      ).to.be.rejectedWith(/https/);
+    });
+
+    it('requestForBatchFetch resolves for an https src', () => {
+      const el = element('https://data.com');
+      return expect(
+        requestForBatchFetch(el, el.getAttribute('src'), none, false)
+      ).to.eventually.have.property('xhrUrl', 'https://data.com');
+    });
+
+    it('batchFetchJsonFor throws for a non-https src', () => {
+      const el = element('http://data.com');
+      allowConsoleError(() => {
+        expect(() => batchFetchJsonFor(ampdoc, el)).to.throw(/https/);
       });
     });
   });
