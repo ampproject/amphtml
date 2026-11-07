@@ -485,6 +485,8 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         const url4 = clickAnchor('https://canonical.test/path');
         const url5 = clickAnchor('https://amp.www.canonical.test/path');
         const url6 = clickAnchor('https://amp.google.com/path');
+        const url7 = clickAnchor('https://eviltest.com/path');
+        const url8 = clickAnchor('https://a.b.test.com/path');
 
         expect(url1).to.not.contain('testLinker1=');
         expect(url2).to.contain('testLinker1=');
@@ -492,6 +494,8 @@ describes.realWin('Linker Manager', {amp: true}, (env) => {
         expect(url4).to.contain('testLinker1=');
         expect(url5).to.contain('testLinker1=');
         expect(url6).to.not.contain('testLinker1=');
+        expect(url7).to.not.contain('testLinker1=');
+        expect(url8).to.contain('testLinker1=');
       });
     });
 
