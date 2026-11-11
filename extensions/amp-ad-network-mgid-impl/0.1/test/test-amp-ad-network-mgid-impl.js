@@ -65,6 +65,7 @@ describes.realWin(
           /(\?|&)pvid=[a-zA-Z0-9\-_]+(&|$)/,
           /(\?|&)muid=amp-[a-zA-Z0-9\-_]+(&|$)/,
           /(\?|&)implVersion=15(&|$)/,
+          /(\?|&)placementType=8(&|$)/,
         ].forEach((regexp) => {
           expect(url).to.match(regexp);
         });

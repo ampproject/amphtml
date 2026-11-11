@@ -66,6 +66,7 @@ export class AmpAdNetworkMgidImpl extends AmpA4A {
     adUrlParams.push(this.getPvidParam_());
     adUrlParams.push(this.getMuidParam_());
     adUrlParams.push('implVersion=15');
+    adUrlParams.push('placementType=8');
 
     return Promise.allSettled(adUrlParams).then((params) => {
       const data = [];
