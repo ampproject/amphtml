@@ -1572,6 +1572,16 @@ export class VisibilityTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
+    const {ampdoc} = this.root;
+    if (!ampdoc.hasBeenVisible()) {
+      // Visibility is tracked from the first time the document is visible.
+      // Only reachable with `data-initialize-when-hidden`.
+      const unlistenPromise = ampdoc
+        .whenFirstVisible()
+        .then(() => this.add(context, eventType, config, listener));
+      return () => unlistenPromise.then((unlisten) => unlisten());
+    }
+
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];

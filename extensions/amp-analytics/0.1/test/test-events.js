@@ -1881,6 +1881,29 @@ describes.realWin('Events', {amp: 1}, (env) => {
       expect(event.vars.totalVisibleTime).to.equal(10);
     });
 
+    it('should add doc listener once the document is first visible', async () => {
+      const hasBeenVisibleStub = env.sandbox
+        .stub(ampdoc, 'hasBeenVisible')
+        .returns(false);
+      const firstVisible = new Deferred();
+      env.sandbox
+        .stub(ampdoc, 'whenFirstVisible')
+        .returns(firstVisible.promise);
+      const listenRoot = visibilityManagerMock
+        .expects('listenRoot')
+        .once()
+        .returns(() => {});
+
+      tracker.add(analyticsElement, 'visible', {}, eventResolver);
+      await macroTask();
+      expect(listenRoot.callCount).to.equal(0);
+
+      hasBeenVisibleStub.returns(true);
+      firstVisible.resolve();
+      await macroTask();
+      expect(listenRoot.callCount).to.equal(1);
+    });
+
     it('should add root listener', async () => {
       const config = {selector: ':root'};
       iniLoadTrackerMock.expects('getElementSignal').never();
