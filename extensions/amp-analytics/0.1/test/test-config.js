@@ -338,6 +338,20 @@ describes.realWin(
           'foobar': {'foobar': ['abc', 'def']},
         });
       });
+
+      it('does not pollute the prototype via __proto__', () => {
+        const from = JSON.parse('{"__proto__": {"polluted": "yes"}}');
+        mergeObjects(from, {});
+        expect({}.polluted).to.be.undefined;
+      });
+
+      it('does not pollute the prototype via constructor', () => {
+        const from = JSON.parse(
+          '{"constructor": {"prototype": {"polluted": "yes"}}}'
+        );
+        mergeObjects(from, {});
+        expect({}.polluted).to.be.undefined;
+      });
     });
 
     describe('vendor only configs', () => {

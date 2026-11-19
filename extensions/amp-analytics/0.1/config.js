@@ -499,8 +499,14 @@ export function mergeObjects(from, to, opt_predefinedVendorConfig) {
       opt_predefinedVendorConfig || property != 'iframePing',
       'iframePing config is only available to vendor config.'
     );
-    // Only deal with own properties.
-    if (hasOwn(from, property)) {
+    // Only deal with own properties, and never let a key reach the prototype
+    // chain (remote/inline config is attacker reachable).
+    if (
+      hasOwn(from, property) &&
+      property != '__proto__' &&
+      property != 'constructor' &&
+      property != 'prototype'
+    ) {
       if (isArray(from[property])) {
         if (!isArray(to[property])) {
           to[property] = [];
