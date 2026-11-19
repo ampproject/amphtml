@@ -1,3 +1,4 @@
+import {tryResolve} from '#core/data-structures/promise';
 import {getValueForExpr} from '#core/types/object';
 
 import {Services} from '#service';
@@ -85,10 +86,16 @@ export function batchFetchJsonFor(ampdoc, element, options = {}) {
 export function requestForBatchFetch(element, url, replacement, refresh) {
   // Replace vars in URL if desired.
   const urlReplacements = Services.urlReplacementsForDoc(element);
-  const promise =
-    replacement >= UrlReplacementPolicy_Enum.OPT_IN
+  // The https check also lives here so that callers which use
+  // requestForBatchFetch directly (amp-list and amp-autocomplete SSR) reject
+  // non-https URLs. It runs inside the promise so those callers get a
+  // rejection their existing error handling picks up, not a synchronous throw.
+  const promise = tryResolve(() => {
+    assertHttpsUrl(url, element);
+    return replacement >= UrlReplacementPolicy_Enum.OPT_IN
       ? urlReplacements.expandUrlAsync(url)
-      : Promise.resolve(url);
+      : url;
+  });
 
   return promise.then((xhrUrl) => {
     // Throw user error if this element is performing URL substitutions
