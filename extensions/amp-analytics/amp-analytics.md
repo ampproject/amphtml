@@ -1368,6 +1368,19 @@ If provided, the page will not process analytics requests until an
 with the given HTML element id is confirmed (accepted) by the user. This is an
 optional attribute.
 
+### `data-initialize-when-hidden` (optional)
+
+By default, `amp-analytics` does not process its configuration until the
+document becomes visible. If this attribute is present, the configuration is
+also processed while the document is hidden, but never while it is
+prerendering. This allows triggers that do not depend on visibility, such as
+`ini-load`, to fire for an ad that is rendered in the background. The `visible`
+and `hidden` triggers still start when the document first becomes visible.
+
+This attribute only takes effect in
+[AMPHTML ads](../amp-a4a/amp-a4a-format.md) that are rendered in an iframe with
+the `amp4ads-v0.js` runtime, such as ads on non-AMP pages.
+
 ## Analytics
 
 AMP component developers can implement collection of data using AMP analytics.
