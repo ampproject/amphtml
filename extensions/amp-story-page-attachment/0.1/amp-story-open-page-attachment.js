@@ -17,6 +17,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {dev} from '#utils/log';
 
 import {
+  cssUrl,
   getRGBFromCssColorValue,
   getTextColorForRGB,
   maybeMakeProxyUrl,
@@ -165,7 +166,7 @@ const renderOutlinkUI = (pageEl, attachmentEl) => {
           {openImgAttr && openImgAttr !== 'none' ? (
             <div
               class="i-amphtml-story-outlink-page-attachment-img"
-              style={{backgroundImage: `url(${openImgAttr}) !important`}}
+              style={{backgroundImage: `${cssUrl(openImgAttr)} !important`}}
             ></div>
           ) : openImgAttr ? null : (
             renderOutlinkLinkIconElement()
@@ -205,7 +206,7 @@ const renderInlineUi = (pageEl, attachmentEl) => {
     return (
       <div
         class="i-amphtml-story-inline-page-attachment-img"
-        style={{backgroundImage: `url(${proxied}) !important`}}
+        style={{backgroundImage: `${cssUrl(proxied)} !important`}}
       ></div>
     );
   };

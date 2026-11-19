@@ -317,6 +317,21 @@ export const maybeMakeProxyUrl = (url, ampDoc) => {
 };
 
 /**
+ * Builds a quoted CSS `url()` token for `url`, escaping it so the value cannot
+ * terminate the token and inject extra declarations. Use this whenever a URL is
+ * interpolated into an inline `style` string, since those are serialized to a
+ * `setAttribute('style', ...)` call that accepts multiple declarations.
+ * @param {string} url
+ * @return {string}
+ */
+export const cssUrl = (url) => {
+  const escaped = String(url)
+    .replace(/[\n\r\f]/g, '')
+    .replace(/["\\]/g, '\\$&');
+  return `url("${escaped}")`;
+};
+
+/**
  * Whether the document is transformed
  * @param {!AmpDoc} ampdoc
  * @return {boolean}

@@ -284,5 +284,30 @@ describes.realWin(
       );
       expect(openAttachmentLinkIcon).to.not.exist;
     });
+
+    it('keeps a malicious cta-image contained in the background-image url()', async () => {
+      // cta-image comes verbatim from the (untrusted) ad creative for single
+      // page story ads, and is interpolated into an inline style string. A
+      // value that closes the url() must not leak extra declarations onto the
+      // host-page element.
+      const payload =
+        'https://evil.example/x.png) !important; position: fixed; top: 0; ' +
+        'left: 0; width: 100vw; height: 100vh; z-index: 2147483647; ' +
+        'background: url(//evil.example/track';
+      outlinkEl.setAttribute('layout', 'nodisplay');
+      outlinkEl.setAttribute('cta-text', 'Outlink');
+      outlinkEl.setAttribute('cta-image', payload);
+
+      await outlink.buildCallback();
+      await outlink.layoutCallback();
+
+      const imgEl = page.querySelector(
+        '.i-amphtml-story-outlink-page-attachment-img'
+      );
+      expect(imgEl).to.exist;
+      expect(imgEl.style.position).to.equal('');
+      expect(imgEl.style.zIndex).to.equal('');
+      expect(imgEl.style.backgroundImage).to.contain('evil.example/x.png');
+    });
   }
 );
