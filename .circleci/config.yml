@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  browser-tools: circleci/browser-tools@2.4.2
-  codecov: codecov/codecov@6.0.0
+  browser-tools: circleci/browser-tools@2.4.3
+  codecov: codecov/codecov@6.1.0
   macos: circleci/macos@3.0.0
   node: circleci/node@7.2.1
 
@@ -69,7 +69,7 @@ executors:
     resource_class: 2xlarge
   macos-medium:
     macos:
-      xcode: 26.2.0
+      xcode: 27.3.0
     resource_class: m4pro.medium
 
 commands:
