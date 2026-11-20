@@ -78,7 +78,7 @@ CMP_CONFIG['opencmp'] = {
 
 CMP_CONFIG['pubtech'] = {
   'consentInstanceId': 'pubtech',
-  'checkConsentHref': 'https://amp.pubtech.it/cmp-amp-check-consent',
+  'checkConsentHref': 'https://amp.pubtech.ai/cmp-amp-check-consent',
   'promptUISrc': 'https://cdn.pubtech.ai/amp/index.html',
 };
 
