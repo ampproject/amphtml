@@ -189,17 +189,24 @@ export function appendEncodedParamStringToUrl(
   if (!paramString) {
     return url;
   }
-  const mainAndFragment = url.split('#', 2);
-  const mainAndQuery = mainAndFragment[0].split('?', 2);
+  // Split only on the first `#` and the first `?`. `String#split` with a limit
+  // drops everything after the limit, which would truncate query strings that
+  // contain `?` and fragments that contain `#`.
+  const fragmentIndex = url.indexOf('#');
+  const main = fragmentIndex == -1 ? url : url.slice(0, fragmentIndex);
+  const fragment = fragmentIndex == -1 ? '' : url.slice(fragmentIndex + 1);
+  const queryIndex = main.indexOf('?');
+  const path = queryIndex == -1 ? main : main.slice(0, queryIndex);
+  const query = queryIndex == -1 ? '' : main.slice(queryIndex + 1);
 
   let newUrl =
-    mainAndQuery[0] +
-    (mainAndQuery[1]
+    path +
+    (query
       ? opt_addToFront
-        ? `?${paramString}&${mainAndQuery[1]}`
-        : `?${mainAndQuery[1]}&${paramString}`
+        ? `?${paramString}&${query}`
+        : `?${query}&${paramString}`
       : `?${paramString}`);
-  newUrl += mainAndFragment[1] ? `#${mainAndFragment[1]}` : '';
+  newUrl += fragment ? `#${fragment}` : '';
   return newUrl;
 }
 
