@@ -386,7 +386,9 @@ describes.realWin('story-ad-page', {amp: true}, (env) => {
       expect(openWindowDialogStub).to.be.calledWithExactly(
         win,
         'https://www.google.com',
-        '_blank'
+        '_blank',
+        // `noopener` or empty, depending on the platform.
+        env.sandbox.match.string
       );
     });
 
