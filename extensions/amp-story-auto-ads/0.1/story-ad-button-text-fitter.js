@@ -9,7 +9,13 @@ const MAX_HEIGHT = 32;
 const FontSizes = {
   MIN: 12,
   MAX: 14,
+  // High-resolution display font sizes
+  HIGH_RES_MIN: 18,
+  HIGH_RES_MAX: 21,
 };
+
+/** @const {number} Breakpoint for high-resolution displays (4K) */
+const HIGH_RES_BREAKPOINT = 2560;
 
 export class ButtonTextFitter {
   /**
@@ -50,14 +56,26 @@ export class ButtonTextFitter {
     return this.mutator_
       .mutateElement(container, () => {
         this.measurer_.textContent = content;
+
+        // Check if we're on a high-resolution display
+        const isHighRes = this.doc_.defaultView.innerWidth >= HIGH_RES_BREAKPOINT;
+
+        // Use appropriate font size range based on screen resolution
+        const minFontSize = isHighRes ? FontSizes.HIGH_RES_MIN : FontSizes.MIN;
+        const maxFontSize = isHighRes ? FontSizes.HIGH_RES_MAX : FontSizes.MAX;
+
+        // For high-res displays, we scale the MAX_HEIGHT proportionally
+        const buttonHeight = isHighRes ? MAX_HEIGHT * 1.5 : MAX_HEIGHT;
+
         const fontSize = calculateFontSize(
           this.measurer_,
-          MAX_HEIGHT,
+          buttonHeight,
           this.getMaxWidth_(pageElement),
-          FontSizes.MIN,
-          FontSizes.MAX
+          minFontSize,
+          maxFontSize
         );
-        if (fontSize >= FontSizes.MIN) {
+
+        if (fontSize >= minFontSize) {
           this.updateFontSize_(container, fontSize);
           success = true;
         }
@@ -70,12 +88,16 @@ export class ButtonTextFitter {
   /**
    * Called on each button creation, in case of window resize.
    * Page width - (2 x 32px of padding on each side) + (2 x 10px padding on button).
+   * For high-resolution displays, we scale the padding proportionally.
    * @param {!Element} pageElement
    * @return {number}
    * @private
    */
   getMaxWidth_(pageElement) {
-    return pageElement./*OK*/ offsetWidth - 84;
+    const isHighRes = this.doc_.defaultView.innerWidth >= HIGH_RES_BREAKPOINT;
+    // For high-res displays, we use a larger padding to maintain proportions
+    const padding = isHighRes ? 126 : 84; // 84 * 1.5 = 126
+    return pageElement./*OK*/ offsetWidth - padding;
   }
 
   /**
