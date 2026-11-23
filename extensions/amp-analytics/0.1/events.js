@@ -1572,16 +1572,6 @@ export class VisibilityTracker extends EventTracker {
 
   /** @override */
   add(context, eventType, config, listener) {
-    const {ampdoc} = this.root;
-    if (!ampdoc.hasBeenVisible()) {
-      // Visibility is tracked from the first time the document is visible.
-      // Only reachable with `data-initialize-when-hidden`.
-      const unlistenPromise = ampdoc
-        .whenFirstVisible()
-        .then(() => this.add(context, eventType, config, listener));
-      return () => unlistenPromise.then((unlisten) => unlisten());
-    }
-
     const visibilitySpec = config['visibilitySpec'] || {};
     const selector = config['selector'] || visibilitySpec['selector'];
     const waitForSpec = visibilitySpec['waitFor'];
@@ -1605,8 +1595,6 @@ export class VisibilityTracker extends EventTracker {
       reportWhenSpec = 'documentHidden';
     }
 
-    const visibilityManager = this.root.getVisibilityManager();
-
     if (reportWhenSpec == 'documentHidden') {
       createReportReadyPromiseFunc =
         this.createReportReadyPromiseForDocumentHidden_.bind(this);
@@ -1620,6 +1608,29 @@ export class VisibilityTracker extends EventTracker {
         reportWhenSpec
       );
     }
+
+    assertUniqueSelectors(selector);
+
+    const {ampdoc} = this.root;
+    if (!ampdoc.hasBeenVisible()) {
+      // Visibility is tracked from the first time the document is visible.
+      // Only reachable with `data-initialize-when-hidden`.
+      let canceled = false;
+      const unlistenPromise = ampdoc.whenFirstVisible().then(() => {
+        if (!canceled) {
+          return this.add(context, eventType, config, listener);
+        }
+      });
+      return () => {
+        canceled = true;
+        unlistenPromise.then(
+          (unlisten) => unlisten?.(),
+          () => {}
+        );
+      };
+    }
+
+    const visibilityManager = this.root.getVisibilityManager();
 
     // Root selectors are delegated to analytics roots.
     if (!selector || selector == ':root' || selector == ':host') {
@@ -1645,7 +1656,6 @@ export class VisibilityTracker extends EventTracker {
     // Array selectors do not suppor the special cases: ':host' & ':root'
     const selectionMethod =
       config['selectionMethod'] || visibilitySpec['selectionMethod'];
-    assertUniqueSelectors(selector);
     const unlistenPromise = this.root
       .getElements(context.parentElement || context, selector, selectionMethod)
       .then((elements) => {

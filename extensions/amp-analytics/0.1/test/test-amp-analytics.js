@@ -1,6 +1,7 @@
 import {expect} from 'chai';
 
 import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
 import {LayoutPriority_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
@@ -241,10 +242,31 @@ describes.realWin(
             .returns(new Promise(() => {}));
         });
 
-        it('sends a hit while the document is hidden', async () => {
+        it('sends a hit once content loads while the document is hidden', async () => {
+          // Simulate a hidden document where IntersectionObserver never fires.
+          env.sandbox
+            .stub(win, 'IntersectionObserver')
+            .returns({observe() {}, unobserve() {}, disconnect() {}});
+          const img = doc.createElement('amp-img');
+          img.setAttribute('width', '10');
+          img.setAttribute('height', '10');
+          img.setAttribute('layout', 'fixed');
+          doc.body.appendChild(img);
+          const resources = Services.resourcesForDoc(ampdoc);
+          await macroTask();
+          const imgResource = resources.getResourceForElement(img);
+          imgResource.measure();
+          const imgLoaded = new Deferred();
+          env.sandbox
+            .stub(imgResource, 'loadedOnce')
+            .returns(imgLoaded.promise);
+
           const analytics = getAnalyticsTag(config, attrs);
           ampdoc.signals().signal('ready-scan');
-          await waitForSendRequest(analytics);
+          await waitForNoSendRequest(analytics);
+
+          imgLoaded.resolve();
+          await macroTask();
           requestVerifier.verifyRequest('https://example.test/bar');
         });
 

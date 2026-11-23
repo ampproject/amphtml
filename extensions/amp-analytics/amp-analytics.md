@@ -1374,8 +1374,12 @@ By default, `amp-analytics` does not process its configuration until the
 document becomes visible. If this attribute is present, the configuration is
 also processed while the document is hidden, but never while it is
 prerendering. This allows triggers that do not depend on visibility, such as
-`ini-load`, to fire for an ad that is rendered in the background. The `visible`
-and `hidden` triggers still start when the document first becomes visible.
+`ini-load`, to fire for an ad that is rendered in the background.
+
+The `visible` and `hidden` triggers, and timer `startSpec` and `stopSpec` that
+use them, have no effect until the document first becomes visible. Set
+`maxTimerLength` on such timers so they do not run uncapped while the ad stays
+hidden.
 
 This attribute only takes effect in
 [AMPHTML ads](../amp-a4a/amp-a4a-format.md) that are rendered in an iframe with

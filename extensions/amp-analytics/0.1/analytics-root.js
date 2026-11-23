@@ -512,7 +512,9 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
       rect = viewport.getLayoutRect(this.getRootElement());
       if (!this.ampdoc.hasBeenVisible()) {
         // IntersectionObserver does not report in a hidden document, so
-        // measure directly. Only reachable with `data-initialize-when-hidden`.
+        // measure directly against the creative's root rect (which includes
+        // content outside the iframe viewport, unlike the visible InOb path).
+        // Only reachable with `data-initialize-when-hidden`.
         return whenContentIniLoadMeasure(this.ampdoc, this.ampdoc.win, rect);
       }
     } else {

@@ -1889,12 +1889,18 @@ describes.realWin('Events', {amp: 1}, (env) => {
       env.sandbox
         .stub(ampdoc, 'whenFirstVisible')
         .returns(firstVisible.promise);
+      const unlistenSpy = env.sandbox.spy();
       const listenRoot = visibilityManagerMock
         .expects('listenRoot')
         .once()
-        .returns(() => {});
+        .returns(unlistenSpy);
 
-      tracker.add(analyticsElement, 'visible', {}, eventResolver);
+      const unlisten = tracker.add(
+        analyticsElement,
+        'visible',
+        {},
+        eventResolver
+      );
       await macroTask();
       expect(listenRoot.callCount).to.equal(0);
 
@@ -1902,6 +1908,59 @@ describes.realWin('Events', {amp: 1}, (env) => {
       firstVisible.resolve();
       await macroTask();
       expect(listenRoot.callCount).to.equal(1);
+
+      unlisten();
+      await macroTask();
+      expect(unlistenSpy).to.be.calledOnce;
+    });
+
+    it('should not add doc listener if unlistened before first visible', async () => {
+      const hasBeenVisibleStub = env.sandbox
+        .stub(ampdoc, 'hasBeenVisible')
+        .returns(false);
+      const firstVisible = new Deferred();
+      env.sandbox
+        .stub(ampdoc, 'whenFirstVisible')
+        .returns(firstVisible.promise);
+      visibilityManagerMock.expects('listenRoot').never();
+
+      const unlisten = tracker.add(
+        analyticsElement,
+        'visible',
+        {},
+        eventResolver
+      );
+      unlisten();
+
+      hasBeenVisibleStub.returns(true);
+      firstVisible.resolve();
+      await macroTask();
+    });
+
+    it('should validate spec synchronously before first visible', () => {
+      env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
+      env.sandbox
+        .stub(ampdoc, 'whenFirstVisible')
+        .returns(new Promise(() => {}));
+
+      allowConsoleError(() => {
+        expect(() =>
+          tracker.add(
+            analyticsElement,
+            'visible',
+            {visibilitySpec: {reportWhen: 'documentExit', repeat: true}},
+            eventResolver
+          )
+        ).to.throw(/reportWhen and repeat are mutually exclusive/);
+        expect(() =>
+          tracker.add(
+            analyticsElement,
+            'visible',
+            {selector: ['.target', '.target']},
+            eventResolver
+          )
+        ).to.throw(/Cannot have duplicate selectors/);
+      });
     });
 
     it('should add root listener', async () => {

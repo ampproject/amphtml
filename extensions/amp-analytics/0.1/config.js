@@ -104,7 +104,7 @@ export class AnalyticsConfig {
     dev().fine(TAG, 'Fetching vendor config', vendorUrl);
 
     return Services.xhrFor(toWin(this.win_))
-      .fetchJson(vendorUrl, {ampCors: false})
+      .fetchJson(vendorUrl, {ampCors: false, prerenderSafe: true})
       .then((res) => res.json())
       .then(
         (jsonValue) => {
@@ -131,7 +131,7 @@ export class AnalyticsConfig {
     assertHttpsUrl(remoteConfigUrl, this.element_);
     const TAG = this.getName_();
     dev().fine(TAG, 'Fetching remote config', remoteConfigUrl);
-    const fetchConfig = {};
+    const fetchConfig = {prerenderSafe: true};
     if (this.element_.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element_.getAttribute('data-credentials');
     }
@@ -203,6 +203,7 @@ export class AnalyticsConfig {
       const fetchConfig = {
         method: 'POST',
         body: config,
+        prerenderSafe: true,
       };
       if (this.element_.hasAttribute('data-credentials')) {
         fetchConfig.credentials =
