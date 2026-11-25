@@ -1229,6 +1229,7 @@ tags: {  # `<style amp-keyframes>`, [AMP, AMP4ADS]
            type: 'braille'
            type: 'embossesd'
            type: 'aural'
+           type: 'not'
            feature: 'any-hover'
            feature: 'any-pointer'
            feature: 'aspect-ratio'
