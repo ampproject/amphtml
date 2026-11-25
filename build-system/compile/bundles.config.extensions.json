@@ -109,6 +109,11 @@
     "latestVersion": "0.1"
   },
   {
+    "name": "amp-ad-network-insurads-impl",
+    "version": "0.1",
+    "latestVersion": "0.1"
+  },
+  {
     "name": "amp-ad-network-mgid-impl",
     "version": "0.1",
     "latestVersion": "0.1"
