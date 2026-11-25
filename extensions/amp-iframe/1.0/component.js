@@ -132,7 +132,12 @@ export function BentoIframe({
 
   const handleEmbedSizePostMessage = useCallback(
     (event) => {
-      if (event.data?.type !== MessageType_Enum.EMBED_SIZE) {
+      const iframe = iframeRef.current;
+      if (
+        !iframe ||
+        event.source !== iframe.contentWindow ||
+        event.data?.type !== MessageType_Enum.EMBED_SIZE
+      ) {
         return;
       }
       dataRef.current = event.data;
