@@ -932,6 +932,14 @@ describes.sandboxed('validateAttributeChange', {}, () => {
     expect(vac('amp-img', 'on', 'tap: AMP.print')).to.be.true;
   });
 
+  it('should not allow event handler attributes on AMP elements', () => {
+    purifier.isValidAttribute = () => false;
+
+    expect(vac('amp-img', 'onclick', 'alert(1)')).to.be.false;
+    expect(vac('amp-layout', 'onmouseover', 'alert(1)')).to.be.false;
+    expect(vac('amp-img', 'on', 'tap: AMP.print')).to.be.true;
+  });
+
   it('should perform AMP runtime validations', () => {
     // !important style modifier.
     expect(vac('h1', 'style', 'color: red !important')).to.be.false;
