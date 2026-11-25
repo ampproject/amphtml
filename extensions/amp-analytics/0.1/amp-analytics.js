@@ -1,3 +1,4 @@
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
 import {Deferred} from '#core/data-structures/promise';
 import {isIframed} from '#core/dom';
 import {LayoutPriority_Enum} from '#core/dom/layout';
@@ -207,8 +208,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     const ampdoc = this.getAmpDoc();
-    this.iniPromise_ = ampdoc
-      .whenFirstVisible()
+    this.iniPromise_ = this.whenReadyToInitialize_()
       // Rudimentary "idle" signal.
       .then(() => Services.timerFor(this.win).promise(1))
       .then(() => this.consentPromise_)
@@ -252,6 +252,26 @@ export class AmpAnalytics extends AMP.BaseElement {
       this./*OK*/ collapse();
     });
     return this.iniPromise_;
+  }
+
+  /**
+   * Waits for the document to become visible. AMPHTML ads can opt in to
+   * initializing in a hidden document with `data-initialize-when-hidden`,
+   * except while the document is prerendering.
+   * @return {!Promise}
+   * @private
+   */
+  whenReadyToInitialize_() {
+    const ampdoc = this.getAmpDoc();
+    if (
+      this.isInabox_ &&
+      this.element.hasAttribute('data-initialize-when-hidden') &&
+      ampdoc.getVisibilityState() == VisibilityState_Enum.HIDDEN &&
+      !this.win.document['prerendering']
+    ) {
+      return Promise.resolve();
+    }
+    return ampdoc.whenFirstVisible();
   }
 
   /**

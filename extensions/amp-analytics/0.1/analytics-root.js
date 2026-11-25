@@ -16,7 +16,10 @@ import {dev, user, userAssert} from '#utils/log';
 import {ScrollManager} from './scroll-manager';
 import {provideVisibilityManager} from './visibility-manager';
 
-import {whenContentIniLoad} from '../../../src/ini-load';
+import {
+  whenContentIniLoad,
+  whenContentIniLoadMeasure,
+} from '../../../src/ini-load';
 import {getMode} from '../../../src/mode';
 
 const TAG = 'amp-analytics/analytics-root';
@@ -507,6 +510,13 @@ export class AmpdocAnalyticsRoot extends AnalyticsRoot {
       // Once address, we can simply switch to the 0/0 approach in the `else`
       // clause.
       rect = viewport.getLayoutRect(this.getRootElement());
+      if (!this.ampdoc.hasBeenVisible()) {
+        // IntersectionObserver does not report in a hidden document, so
+        // measure directly against the creative's root rect (which includes
+        // content outside the iframe viewport, unlike the visible InOb path).
+        // Only reachable with `data-initialize-when-hidden`.
+        return whenContentIniLoadMeasure(this.ampdoc, this.ampdoc.win, rect);
+      }
     } else {
       const size = viewport.getSize();
       rect = layoutRectLtwh(0, 0, size.width, size.height);

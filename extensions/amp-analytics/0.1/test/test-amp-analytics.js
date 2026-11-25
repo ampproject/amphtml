@@ -1,5 +1,7 @@
 import {expect} from 'chai';
 
+import {VisibilityState_Enum} from '#core/constants/visibility-state';
+import {Deferred} from '#core/data-structures/promise';
 import {LayoutPriority_Enum} from '#core/dom/layout';
 
 import {Services} from '#service';
@@ -220,6 +222,72 @@ describes.realWin(
         expect(whenFirstVisibleStub).to.be.calledOnce;
         return iniPromise.then(() => {
           expect(el).to.have.attribute('hidden');
+        });
+      });
+
+      describe('data-initialize-when-hidden', () => {
+        const config = {
+          'requests': {'foo': 'https://example.test/bar'},
+          'triggers': {'iniLoad': {'on': 'ini-load', 'request': 'foo'}},
+        };
+        const attrs = {'data-initialize-when-hidden': ''};
+        let whenFirstVisibleStub;
+
+        beforeEach(() => {
+          win.__AMP_MODE.runtime = 'inabox';
+          ampdoc.overrideVisibilityState(VisibilityState_Enum.HIDDEN);
+          env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
+          whenFirstVisibleStub = env.sandbox
+            .stub(ampdoc, 'whenFirstVisible')
+            .returns(new Promise(() => {}));
+        });
+
+        it('sends a hit once content loads while the document is hidden', async () => {
+          // Simulate a hidden document where IntersectionObserver never fires.
+          env.sandbox
+            .stub(win, 'IntersectionObserver')
+            .returns({observe() {}, unobserve() {}, disconnect() {}});
+          const img = doc.createElement('amp-img');
+          img.setAttribute('width', '10');
+          img.setAttribute('height', '10');
+          img.setAttribute('layout', 'fixed');
+          doc.body.appendChild(img);
+          const resources = Services.resourcesForDoc(ampdoc);
+          await macroTask();
+          const imgResource = resources.getResourceForElement(img);
+          imgResource.measure();
+          const imgLoaded = new Deferred();
+          env.sandbox
+            .stub(imgResource, 'loadedOnce')
+            .returns(imgLoaded.promise);
+
+          const analytics = getAnalyticsTag(config, attrs);
+          ampdoc.signals().signal('ready-scan');
+          await waitForNoSendRequest(analytics);
+
+          imgLoaded.resolve();
+          await macroTask();
+          requestVerifier.verifyRequest('https://example.test/bar');
+        });
+
+        it('waits for the document to be visible without the attribute', () => {
+          const analytics = getAnalyticsTag(config);
+          analytics.layoutCallback();
+          expect(whenFirstVisibleStub).to.be.calledOnce;
+        });
+
+        it('waits for the document to be visible outside of inabox', () => {
+          win.__AMP_MODE.runtime = 'single';
+          const analytics = getAnalyticsTag(config, attrs);
+          analytics.layoutCallback();
+          expect(whenFirstVisibleStub).to.be.calledOnce;
+        });
+
+        it('waits for the document to be visible while prerendering', () => {
+          Object.defineProperty(doc, 'prerendering', {value: true});
+          const analytics = getAnalyticsTag(config, attrs);
+          analytics.layoutCallback();
+          expect(whenFirstVisibleStub).to.be.calledOnce;
         });
       });
 

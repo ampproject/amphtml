@@ -120,6 +120,17 @@ describes.realWin('AmpdocAnalyticsRoot', {amp: 1}, (env) => {
     );
   });
 
+  it('should measure ini-load for inabox before the first visible', () => {
+    win.__AMP_MODE = {runtime: 'inabox'};
+    env.sandbox.stub(ampdoc, 'hasBeenVisible').returns(false);
+    const inObSpy = env.sandbox.spy(IniLoad, 'whenContentIniLoad');
+    const measureSpy = env.sandbox.spy(IniLoad, 'whenContentIniLoadMeasure');
+
+    root.whenIniLoaded();
+    expect(measureSpy).to.be.calledOnce;
+    expect(inObSpy).to.not.be.called;
+  });
+
   it('should create visibility root', () => {
     const visibilityManager = root.getVisibilityManager();
     expect(visibilityManager).to.be.instanceOf(VisibilityManagerForDoc);
