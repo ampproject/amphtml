@@ -59,6 +59,17 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
     );
   });
 
+  it('should convert a host that only contains the CDN host', () => {
+    expect(
+      ampAdTemplateHelper.getTemplateProxyUrl_(
+        'https://cdn.ampproject.org.adserver.com/amp_template_1'
+      )
+    ).to.equal(
+      'https://cdn-ampproject-org-adserver-com.cdn.ampproject.org/ad/s/' +
+        'cdn.ampproject.org.adserver.com/amp_template_1'
+    );
+  });
+
   it('should render a template with correct values', () => {
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/ innerHTML =
