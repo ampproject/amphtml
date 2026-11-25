@@ -11,6 +11,7 @@ import {LocalizedStringId_Enum} from '#service/localization/strings';
 import {dev} from '#utils/log';
 
 import {localizeTemplate} from 'extensions/amp-story/1.0/amp-story-localization-service';
+import {cssUrl} from 'extensions/amp-story/1.0/utils';
 
 import {DraggableDrawer, DrawerState} from './amp-story-draggable-drawer';
 import {
@@ -281,7 +282,7 @@ export class AmpStoryPageAttachment extends DraggableDrawer {
       openImgAttr && openImgAttr !== 'none' ? (
         <div
           class="i-amphtml-story-page-attachment-remote-img"
-          style={{backgroundImage: `url(${openImgAttr}) !important`}}
+          style={{backgroundImage: `${cssUrl(openImgAttr)} !important`}}
         ></div>
       ) : (
         // Attach link icon SVG by default.
