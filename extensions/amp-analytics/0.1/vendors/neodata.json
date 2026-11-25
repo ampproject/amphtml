@@ -1,19 +1,36 @@
 {
+  "vars": {
+    "gdprAppliesFlag": "$IF($EQUALS(CONSENT_METADATA(gdprApplies), true), 1)$IF($EQUALS(CONSENT_METADATA(gdprApplies), false), 0)",
+    "enableCmDbm": "",
+    "enableCmAdform": "",
+    "enableCmMediamath": ""
+  },
   "requests": {
     "base": "https://tra.neodatagroup.com",
-    "pageview": "${base}/pv?sid=${sysId}&rnd=${random}&id=${tagId}&ad=${advId}&gdpr_consent=${consentString}&rs=${screenWidth}x${screenHeight}&lg=${browserLanguage}&tz=${timezone}&re=${documentReferrer}&co=${screenColorDepth}&ur=${ampdocUrl}",
+    "pageview": "${base}/pv?sid=${sysId}&rnd=${random}&id=${tagId}&ad=${advId}&gdpr=${gdprAppliesFlag}&gdpr_consent=${consentString}&rs=${screenWidth}x${screenHeight}&lg=${browserLanguage}&tz=${timezone}&re=${documentReferrer}&co=${screenColorDepth}&ur=${ampdocUrl}",
     "cmDbm": "https://cm.g.doubleclick.net/pixel?google_nid=neodata_dmp&google_cm&pv=dbm&sid=${sysId}&rt=img&rnd=${random}",
-    "ADFORM": "https://dmp.adform.net/serving/cookie/match?party=1056&rt=img&rnd=${random}",
-    "MEDIAMATH" :"https://pixel.mathtag.com/sync/js?sync=auto&mt_exid=10082&exsync=${base}/cm?sid=${sysId}&pv=MEDIAMATH&eid=[MM_UUID]&rt=img&rnd=${random}"
+    "cmAdform": "https://dmp.adform.net/serving/cookie/match?party=1056&rt=img&rnd=${random}",
+    "cmMediamath": "https://pixel.mathtag.com/sync/js?sync=auto&mt_exid=10082&exsync=${base}/cm?sid=${sysId}&pv=MEDIAMATH&eid=[MM_UUID]&rt=img&rnd=${random}"
   },
   "triggers": {
     "trackPageview": {
       "on": "visible",
       "request": ["pageview"]
     },
-    "trackCookieMatch":{
-      "on":"visible",
-      "request": ["cmDbm", "ADFORM", "MEDIAMATH"]
+    "trackCmDbm": {
+      "on": "visible",
+      "enabled": "${enableCmDbm}",
+      "request": "cmDbm"
+    },
+    "trackCmAdform": {
+      "on": "visible",
+      "enabled": "${enableCmAdform}",
+      "request": "cmAdform"
+    },
+    "trackCmMediamath": {
+      "on": "visible",
+      "enabled": "${enableCmMediamath}",
+      "request": "cmMediamath"
     }
   },
   "transport": {

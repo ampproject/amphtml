@@ -428,6 +428,7 @@ const forbiddenTermsGlobal = {
     message: requiresReviewPrivacy,
     allowlist: [
       'build-system/externs/amp.extern.js',
+      'extensions/amp-analytics/0.1/config.js',
       'extensions/amp-subscriptions-google/0.1/amp-subscriptions-google.js',
       'extensions/amp-video/0.1/video-cache.js',
       'extensions/amp-story/1.0/amp-story.js',

@@ -349,6 +349,37 @@ describes.realWin(
       );
     });
 
+    it('should reject exit URLs with an invalid protocol', async () => {
+      const el = await makeElementWithConfig({
+        targets: {
+          js: {'finalUrl': /* eslint no-script-url: 0 */ 'javascript:alert(1)'},
+          data: {'finalUrl': 'data:text/html,<script>alert(1)</script>'},
+        },
+      });
+      const open = env.sandbox.stub(win, 'open');
+      const impl = await el.getImpl();
+
+      allowConsoleError(() =>
+        impl.executeAction({
+          method: 'exit',
+          args: {target: 'js'},
+          event: makeClickEvent(1001),
+          satisfiesTrust: () => true,
+        })
+      );
+      allowConsoleError(() =>
+        impl.executeAction({
+          method: 'exit',
+          args: {target: 'data'},
+          event: makeClickEvent(1001),
+          satisfiesTrust: () => true,
+        })
+      );
+
+      expect(open).to.not.have.been.called;
+      win.document.body.removeChild(el);
+    });
+
     it('should enable attribution tracking when given `browserAdConversion`', async () => {
       env.sandbox
         .stub(AmpAdExit.prototype, 'detectAttributionReportingSupport')

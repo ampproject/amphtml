@@ -642,6 +642,10 @@ const adConfig = jsonConfiguration({
     prefetch: 'https://cdn.gmossp-sp.jp/ads/amp.js',
   },
 
+  'gsrv': {
+    renderStartImplemented: true,
+  },
+
   'gumgum': {
     prefetch: 'https://js.gumgum.com/slot.js',
     renderStartImplemented: true,
@@ -973,6 +977,10 @@ const adConfig = jsonConfiguration({
 
   'netletix': {
     preconnect: ['https://call.netzathleten-media.de'],
+    renderStartImplemented: true,
+  },
+
+  'neuwo': {
     renderStartImplemented: true,
   },
 

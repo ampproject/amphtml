@@ -62,6 +62,10 @@ describes.realWin(
         const element = getAnalyticsTag({}, {'type': vendorName});
 
         return new AnalyticsConfig(element).loadConfig().then((config) => {
+          expect(xhrStub).to.be.calledWith(
+            env.sandbox.match(`${vendorName}.json`),
+            {ampCors: false, prerenderSafe: true}
+          );
           expect(config['requests']).to.deep.equal({
             'test1': {
               origin: 'https://example.test',
@@ -574,6 +578,7 @@ describes.realWin(
         return new AnalyticsConfig(element).loadConfig().then((config) => {
           expect(xhrStub).to.be.calledWith('/remote', {
             credentials: 'include',
+            prerenderSafe: true,
           });
           expect(config['vars']['title']).to.equal('remote');
         });
@@ -659,6 +664,7 @@ describes.realWin(
               },
             },
             method: 'POST',
+            prerenderSafe: true,
           });
         });
       });
@@ -700,6 +706,7 @@ describes.realWin(
               },
             },
             method: 'POST',
+            prerenderSafe: true,
           });
         });
       });
@@ -733,6 +740,7 @@ describes.realWin(
               triggers: [{on: 'visible', request: 'foo'}],
             },
             method: 'POST',
+            prerenderSafe: true,
           });
         });
       });
@@ -771,6 +779,7 @@ describes.realWin(
               },
             },
             method: 'POST',
+            prerenderSafe: true,
           });
         });
       });
@@ -806,6 +815,7 @@ describes.realWin(
               triggers: [{on: 'visible', request: 'foo'}],
             },
             method: 'POST',
+            prerenderSafe: true,
           });
 
           expect(config['requests']['foo']).to.deep.equal({

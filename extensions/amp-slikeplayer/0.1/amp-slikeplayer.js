@@ -1,5 +1,10 @@
 import {Deferred} from '#core/data-structures/promise';
 import {dispatchCustomEvent} from '#core/dom';
+import {
+  fullscreenEnter,
+  fullscreenExit,
+  isFullscreenElement,
+} from '#core/dom/fullscreen';
 import {isLayoutSizeDefined} from '#core/dom/layout';
 import {observeIntersections} from '#core/dom/layout/viewport-observer';
 import {once} from '#core/types/function';
@@ -8,7 +13,7 @@ import {Services} from '#service';
 import {installVideoManagerForDoc} from '#service/video-manager-impl';
 
 import {getData, listen} from '#utils/event-helper';
-import {userAssert} from '#utils/log';
+import {dev, userAssert} from '#utils/log';
 
 import {getConsentDataToForward} from '../../../src/consent';
 import {disableScrollingOnIframe} from '../../../src/iframe-helper';
@@ -87,6 +92,9 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     /** @private {string} */
     this.baseUrl_ = 'https://tvid.in/player/amp.html';
 
+    /** @private {string} Origin of the player iframe; target for postMessage. */
+    this.targetOrigin_ = '*';
+
     /** @private {number} */
     this.duration_ = 1;
 
@@ -126,6 +134,16 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     this.baseUrl_ = element.getAttribute('data-iframe-src') || this.baseUrl_;
     this.config_ = element.getAttribute('data-config') || '';
     this.poster_ = element.getAttribute('poster') || '';
+
+    // Resolve the player origin so messages target it explicitly rather than '*'.
+    try {
+      this.targetOrigin_ = new URL(
+        this.baseUrl_,
+        this.win.location.href
+      ).origin;
+    } catch {
+      this.targetOrigin_ = '*';
+    }
 
     // Read optional viewport visibility threshold from data-config
     if (this.config_) {
@@ -181,10 +199,10 @@ export class AmpSlikeplayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&baseurl=${this.win.location.origin}`;
+    let src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&amp=1&baseurl=${this.win.location.origin}`;
 
     if (this.config_) {
-      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&baseurl=${this.win.location.origin}`;
+      src = `${this.baseUrl_}#apikey=${this.apikey_}&videoid=${this.videoid_}&${this.config_}&amp=1&baseurl=${this.win.location.origin}`;
     }
 
     const frame = disableScrollingOnIframe(
@@ -241,6 +259,40 @@ export class AmpSlikeplayer extends AMP.BaseElement {
     return false;
   }
 
+  /** @override */
+  fullscreenEnter() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenEnter(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  fullscreenExit() {
+    if (!this.iframe_) {
+      return;
+    }
+    fullscreenExit(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  isFullscreen() {
+    if (!this.iframe_) {
+      return false;
+    }
+    return isFullscreenElement(dev().assertElement(this.iframe_));
+  }
+
+  /** @override */
+  showControls() {
+    this.postMessage_('showControls', '');
+  }
+
+  /** @override */
+  hideControls() {
+    this.postMessage_('hideControls', '');
+  }
+
   /** @private */
   onReady_() {
     const {element} = this;
@@ -257,6 +309,15 @@ export class AmpSlikeplayer extends AMP.BaseElement {
       !this.iframe_ ||
       !messageEvent ||
       messageEvent.source != this.iframe_.contentWindow
+    ) {
+      return;
+    }
+
+    // Defense-in-depth: ignore messages from an unexpected origin when known.
+    if (
+      this.targetOrigin_ !== '*' &&
+      messageEvent.origin &&
+      messageEvent.origin !== this.targetOrigin_
     ) {
       return;
     }
@@ -290,6 +351,9 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         case 'fullscreen':
           break;
         case 'meta':
+          if (detail.duration) {
+            this.duration_ = detail.duration;
+          }
           break;
         case 'mute':
           break;
@@ -298,6 +362,9 @@ export class AmpSlikeplayer extends AMP.BaseElement {
         case 'time':
           const {currentTime} = detail;
           this.currentTime_ = currentTime;
+          if (detail.duration) {
+            this.duration_ = detail.duration;
+          }
           break;
         case 'adTime':
           const {position} = detail;
@@ -429,7 +496,7 @@ export class AmpSlikeplayer extends AMP.BaseElement {
           'method': method,
           'optParams': optParams,
         }),
-        '*'
+        this.targetOrigin_
       );
     });
   }
