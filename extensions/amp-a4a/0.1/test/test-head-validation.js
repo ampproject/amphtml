@@ -200,6 +200,50 @@ describes.realWin('head validation', {amp: true}, (env) => {
       expect(preloadStub).not.to.be.called;
     });
 
+    it('does not allow an allowlisted provider in the userinfo of a foreign origin', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.preconnectFor(env.win),
+        'preload'
+      );
+      head.innerHTML = `
+        <link href="https://fast.fonts.net@evil.example/" rel="stylesheet">
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('link')).not.to.exist;
+      expect(preloadStub).not.to.be.called;
+    });
+
+    it('does not allow an allowlisted provider in the path of a foreign origin', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.preconnectFor(env.win),
+        'preload'
+      );
+      head.innerHTML = `
+        <link href="https://evil.example/https://fonts.googleapis.com/css?x" rel="stylesheet">
+      `;
+      const validated = processHead(env.win, adElement, head);
+      expect(validated.head.querySelector('link')).not.to.exist;
+      expect(preloadStub).not.to.be.called;
+    });
+
+    it('rejects a long version-like digit run without backtracking', () => {
+      const preloadStub = env.sandbox.stub(
+        Services.preconnectFor(env.win),
+        'preload'
+      );
+      // A nested quantifier in the version segment would backtrack
+      // exponentially over these digits before failing on the trailing junk.
+      const href = `https://cdn.materialdesignicons.com/${'1'.repeat(
+        30
+      )}/css/materialdesignicons.min.css!`;
+      head.innerHTML = `<link href="${href}" rel="stylesheet">`;
+      const start = Date.now();
+      const validated = processHead(env.win, adElement, head);
+      expect(Date.now() - start).to.be.below(1000);
+      expect(validated.head.querySelector('link')).not.to.exist;
+      expect(preloadStub).not.to.be.called;
+    });
+
     it('keeps amp styles', () => {
       head.innerHTML = `
         <style amp-custom></style>

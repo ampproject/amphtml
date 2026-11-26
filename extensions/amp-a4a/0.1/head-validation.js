@@ -21,10 +21,14 @@ export let ValidatedHeadDef;
 // the whole attribute value (RE2::FullMatch), so anchor it here too: RegExp.test
 // is a substring match, which would accept any href that merely contains an
 // allowed provider (e.g. https://evil.example/#https://fast.fonts.net/).
+// The version segments are spelled `[0-9]+(?:\.[0-9]+)*\.?` rather than the
+// protoascii's `([0-9]+\.?)+`: the two accept the same strings, but the nested
+// quantifier backtracks exponentially in JS once the pattern is anchored, and
+// this runs on the host page against a creative-controlled href.
 const ALLOWED_FONT_REGEX = new RegExp(
   '^(?:' +
     'https://cdn\\.materialdesignicons\\.com/' +
-    '([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|' +
+    '[0-9]+(?:\\.[0-9]+)*\\.?/css/materialdesignicons\\.min\\.css|' +
     'https://cloud\\.typography\\.com/' +
     '[0-9]*/[0-9]*/css/fonts\\.css|' +
     'https://fast\\.fonts\\.net/.*|' +
@@ -32,8 +36,8 @@ const ALLOWED_FONT_REGEX = new RegExp(
     'https://fonts\\.googleapis\\.com/icon\\?.*|' +
     'https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|' +
     'https://maxcdn\\.bootstrapcdn\\.com/font-awesome/' +
-    '([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|' +
-    'https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+' +
+    '[0-9]+(?:\\.[0-9]+)*\\.?/css/font-awesome\\.min\\.css(\\?.*)?|' +
+    'https://(use|pro)\\.fontawesome\\.com/releases/v[0-9]+(?:\\.[0-9]+)*\\.?' +
     '/css/[0-9a-zA-Z-]+\\.css|' +
     'https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z-]+\\.css|' +
     'https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css' +
