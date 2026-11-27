@@ -100,6 +100,7 @@ const STORY_MESSAGE_STATE_TYPE_ENUM = {
   PAGE_ATTACHMENT_STATE: 'PAGE_ATTACHMENT_STATE',
   UI_STATE: 'UI_STATE',
   MUTED_STATE: 'MUTED_STATE',
+  CAPTIONS_STATE: 'CAPTIONS_STATE',
   CURRENT_PAGE_ID: 'CURRENT_PAGE_ID',
   STORY_PROGRESS: 'STORY_PROGRESS',
   DESKTOP_ASPECT_RATIO: 'DESKTOP_ASPECT_RATIO',
@@ -643,6 +644,10 @@ export class AmpStoryPlayer {
 
           messaging.sendRequest('onDocumentState', {
             'state': STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE,
+          });
+
+          messaging.sendRequest('onDocumentState', {
+            'state': STORY_MESSAGE_STATE_TYPE_ENUM.CAPTIONS_STATE,
           });
 
           messaging.sendRequest('onDocumentState', {
@@ -1596,6 +1601,9 @@ export class AmpStoryPlayer {
       case STORY_MESSAGE_STATE_TYPE_ENUM.MUTED_STATE:
         this.onMutedStateUpdate_(/** @type {string} */ (data.value));
         break;
+      case STORY_MESSAGE_STATE_TYPE_ENUM.CAPTIONS_STATE:
+        this.onCaptionsStateUpdate_(/** @type {string} */ (data.value));
+        break;
       case STORY_MESSAGE_STATE_TYPE_ENUM.UI_STATE:
         // Handles UI state updates on window resize.
         this.onUiStateUpdate_(/** @type {number} */ (data.value));
@@ -1668,6 +1676,17 @@ export class AmpStoryPlayer {
   onMutedStateUpdate_(muted) {
     this.element_.dispatchEvent(
       createCustomEvent(this.win_, 'amp-story-muted-state', {muted})
+    );
+  }
+
+  /**
+   * Reacts to captions on/off events coming from the story.
+   * @param {string} captions
+   * @private
+   */
+  onCaptionsStateUpdate_(captions) {
+    this.element_.dispatchEvent(
+      createCustomEvent(this.win_, 'amp-story-captions-state', {captions})
     );
   }
 
