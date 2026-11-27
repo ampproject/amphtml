@@ -59,6 +59,15 @@ describes.fakeWin('AmpAdTemplateHelper', {amp: true}, (env) => {
     );
   });
 
+  it('should proxy a host that only embeds the CDN name as a substring', () => {
+    const lookalikeUrl =
+      'https://cdn.ampproject.org.evil.example/amp_template_1';
+    expect(ampAdTemplateHelper.getTemplateProxyUrl_(lookalikeUrl)).to.equal(
+      'https://cdn-ampproject-org-evil-example.cdn.ampproject.org/ad/s/' +
+        'cdn.ampproject.org.evil.example/amp_template_1'
+    );
+  });
+
   it('should render a template with correct values', () => {
     const parentDiv = doc.createElement('div');
     parentDiv./*OK*/ innerHTML =
