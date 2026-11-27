@@ -84,5 +84,23 @@ amp-brid-player/0.1/test/validator-amp-brid-player.html:72:2 The attribute 'dock
 |        layout="responsive"
 |        width="480" height="270">
 |    </amp-brid-player>
+|    <!-- Valid example with a JSON config child. -->
+|    <amp-brid-player
+|        data-partner="264"
+|        data-player="4144"
+|        data-video="13663"
+|        layout="responsive"
+|        width="480" height="270">
+|      <script type="application/json">{"debug": 1}</script>
+|    </amp-brid-player>
+|    <!-- Valid amp-target-video-player example with a JSON config child. -->
+|    <amp-target-video-player
+|        data-partner="264"
+|        data-player="4144"
+|        data-video="13663"
+|        layout="responsive"
+|        width="480" height="270">
+|      <script type="application/json">{"debug": 1}</script>
+|    </amp-target-video-player>
 |  </body>
 |  </html>

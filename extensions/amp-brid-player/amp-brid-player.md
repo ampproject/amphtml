@@ -3,12 +3,12 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Brid.tv player.
+  text: Displays a TargetVideo player.
 ---
 
 # amp-brid-player
 
-An `amp-brid-player` displays the Brid Player used in [Brid.tv](https://www.brid.tv/) Video Platform.
+An `amp-brid-player` displays the TargetVideo player (formerly Brid Player) used in the [TargetVideo](https://target-video.com/) video platform. It is also available as `amp-target-video-player`.
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
@@ -40,30 +40,30 @@ If this attribute is present, and the browser supports autoplay:
 
 ### `data-partner`
 
-The Brid.tv partner ID.
+The TargetVideo partner ID.
 
 ### `data-player`
 
-The Brid.tv player ID. Specific to every partner.
+The TargetVideo player ID. Specific to every partner.
 
 ### `data-video`
 
-The Brid.tv video ID. Embed code must either have `video`, `playlist`, `carousel`
+The TargetVideo video ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-playlist`
 
-The Brid.tv playlist ID or custom string value for dynamic playlists. Embed code
+The TargetVideo playlist ID or custom string value for dynamic playlists. Embed code
 must either have `video`, `playlist`, `carousel` or `outstream` attribute.
 
 ### `data-carousel`
 
-The Brid.tv carousel ID. Embed code must either have `video`, `playlist`, `carousel`
+The TargetVideo carousel ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-outstream`
 
-The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`, `carousel`
+The TargetVideo outstream unit ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-dynamic`
@@ -82,6 +82,29 @@ For more details, see [documentation on the docking extension itself](https://am
 
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
 extended to AMP components.
+
+## Custom configuration
+
+Additional player configuration can be supplied as a JSON object in a
+`<script type="application/json">` child element. The component forwards it to
+the player iframe.
+
+```html
+<amp-brid-player
+  data-partner="264"
+  data-player="4144"
+  data-video="13663"
+  layout="responsive"
+  width="480"
+  height="270"
+>
+  <script type="application/json">
+    {
+      "debug": 1
+    }
+  </script>
+</amp-brid-player>
+```
 
 ## Actions
 
@@ -107,4 +130,8 @@ Takes the video to fullscreen.
 
 ## Validation
 
+<!-- markdown-link-check-disable -->
+
 See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.
+
+<!-- markdown-link-check-enable -->
