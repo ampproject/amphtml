@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AMP HTML Project</title>
+  <script async src="/dist/alp.max.js"></script>
+  <!-- ✅ Embedded CSS -->
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .site-header {
+      background-color: #333;
+      padding: 10px 0;
+      color: #fff;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links li a {
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links li a:hover {
+      color: #ffcc00;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        flex-direction: column;
+        background-color: #444;
+        width: 100%;
+      }
+
+      .nav-links li {
+        margin: 10px 0;
+      }
+    }
+
+    /* ✅ AD IMAGE STYLING */
+    .ad-section {
+      text-align: center;
+      margin: 60px auto;
+    }
+
+    .ad-label {
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .main-ad {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ Navigation Bar -->
+  <header class="site-header">
+    <nav class="navbar">
+      <div class="logo">MyProject</div>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ✅ Working Ad Image -->
+  <section class="ad-section">
+    <h2 class="ad-label">Sponsored</h2>
+    <a href="https://example.com" target="_blank">
+      <img src="https://via.placeholder.com/300x250" alt="Ad Banner" class="main-ad">
+    </a>
+  </section>
+
+</body>
+</html>
