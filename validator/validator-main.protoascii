@@ -336,8 +336,6 @@ tags: {
     mandatory: true
     value: "https://cdn.ampproject.org/v0/amp-story-1.0.css"
     value: "https://cdn.ampproject.org/lts/v0/amp-story-1.0.css"
-    value: "https://ampjs.org/v0/amp-story-1.0.css"
-    value: "https://ampjs.org/lts/v0/amp-story-1.0.css"
   }
   attrs: { name: "integrity" }  # SRI attribute (https://www.w3.org/TR/SRI/)
   attrs: { name: "media" }
@@ -3362,7 +3360,6 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
-    value: "https://ampjs.org/v0.js"
   }
   cdata: {
     disallowed_cdata_regex: {
@@ -3389,7 +3386,6 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
-    value: "https://ampjs.org/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3417,7 +3413,6 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.js"
-    value: "https://ampjs.org/lts/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3445,7 +3440,6 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.js"
-    value: "https://ampjs.org/lts/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3523,7 +3517,6 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.mjs"
-    value: "https://ampjs.org/lts/v0.mjs"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
@@ -3549,7 +3542,6 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/lts/v0.js"
-    value: "https://ampjs.org/lts/v0.js"
     dispatch_key: NAME_VALUE_DISPATCH
   }
   cdata: {
