@@ -130,4 +130,8 @@ Takes the video to fullscreen.
 
 ## Validation
 
+<!-- markdown-link-check-disable -->
+
 See [amp-brid-player rules](https://github.com/ampproject/amphtml/blob/main/extensions/amp-brid-player/validator-amp-brid-player.protoascii) in the AMP validator specification.
+
+<!-- markdown-link-check-enable -->
