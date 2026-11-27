@@ -1,5 +1,8 @@
 #include "cpp/htmlparser/node.h"
 
+#include <memory>
+#include <sstream>
+
 #include "gtest/gtest.h"
 #include "cpp/htmlparser/atom.h"
 #include "cpp/htmlparser/document.h"
@@ -16,7 +19,7 @@ using htmlparser::RenderError;
 using htmlparser::Renderer;
 
 // For operator""s.
-using namespace std::string_literals;
+using namespace std::string_literals;  // NOLINT(build/namespaces)
 
 TEST(NodeTest, BasicStackFunctionality) {
   NodeStack stack;
