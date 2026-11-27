@@ -323,7 +323,7 @@ export class LinkerManager {
     if (this.highestAvailableDomain_) {
       const destinationDomain = [
         this.highestAvailableDomain_,
-        '*' + this.highestAvailableDomain_,
+        '*.' + this.highestAvailableDomain_,
       ];
       return (
         this.destinationDomainsMatch_(destinationDomain, hostname) ||
