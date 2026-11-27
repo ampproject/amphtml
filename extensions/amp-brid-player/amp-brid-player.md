@@ -83,6 +83,29 @@ For more details, see [documentation on the docking extension itself](https://am
 This element includes [common attributes](https://amp.dev/documentation/guides-and-tutorials/learn/common_attributes)
 extended to AMP components.
 
+## Custom configuration
+
+Additional player configuration can be supplied as a JSON object in a
+`<script type="application/json">` child element. The component forwards it to
+the player iframe.
+
+```html
+<amp-brid-player
+  data-partner="264"
+  data-player="4144"
+  data-video="13663"
+  layout="responsive"
+  width="480"
+  height="270"
+>
+  <script type="application/json">
+    {
+      "debug": 1
+    }
+  </script>
+</amp-brid-player>
+```
+
 ## Actions
 
 ### `play`
