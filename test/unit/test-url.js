@@ -489,6 +489,38 @@ describes.sandboxed('addParamToUrl', {}, () => {
     url = addParamToUrl('https://${host}/${path}', 'foo', 'bar');
     expect(url).to.equal('https://${host}/${path}?foo=bar');
   });
+
+  it('should preserve "?" inside the query string', () => {
+    url = addParamToUrl(
+      'https://www.ampproject.org/get/here?next=/cart?id=5',
+      'foo',
+      'bar'
+    );
+    expect(url).to.equal(
+      'https://www.ampproject.org/get/here?next=/cart?id=5&foo=bar'
+    );
+
+    url = addParamToUrl(
+      'https://www.ampproject.org/get/here?next=/cart?id=5',
+      'foo',
+      'bar',
+      /* addToFront */ true
+    );
+    expect(url).to.equal(
+      'https://www.ampproject.org/get/here?foo=bar&next=/cart?id=5'
+    );
+  });
+
+  it('should preserve "#" inside the fragment', () => {
+    url = addParamToUrl(
+      'https://www.ampproject.org/get/here?a=1#/route#section',
+      'foo',
+      'bar'
+    );
+    expect(url).to.equal(
+      'https://www.ampproject.org/get/here?a=1&foo=bar#/route#section'
+    );
+  });
 });
 
 describes.sandboxed('addParamsToUrl', {}, () => {
