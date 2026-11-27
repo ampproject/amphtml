@@ -8,8 +8,10 @@ import {installResizeObserverStub} from '#testing/resize-observer-stub';
 import {VideoEvents_Enum} from '../../../../src/video-interface';
 
 const EXAMPLE_VIDEOID = 'mGENRKrdoGY';
+const EXAMPLE_CHANNELID = 'UU5Tmo6TCGnc9FioXnzzPJ5A';
 const EXAMPLE_LIVE_CHANNELID = 'UCB8Kb4pxYzsDsHxzBfnid4Q';
 const EXAMPLE_VIDEOID_URL = `https://www.youtube.com/embed/${EXAMPLE_VIDEOID}?enablejsapi=1&amp=1&playsinline=1`;
+const EXAMPLE_CHANNELID_URL = `https://www.youtube.com/embed/?listType=playlist&list=${EXAMPLE_CHANNELID}`;
 const EXAMPLE_LIVE_CHANNELID_URL = `https://www.youtube.com/embed/live_stream?channel=${EXAMPLE_LIVE_CHANNELID}&enablejsapi=1&amp=1&playsinline=1`;
 const EXAMPLE_NO_COOKIE_VIDEOID_URL = `https://www.youtube-nocookie.com/embed/${EXAMPLE_VIDEOID}?enablejsapi=1&amp=1&playsinline=1`;
 
@@ -61,6 +63,10 @@ describes.realWin(
 
     describe('with data-videoid', function () {
       runTestsForDatasource(EXAMPLE_VIDEOID);
+    });
+
+    describe('with data-channelid', function () {
+      runTestsForDatasource(EXAMPLE_CHANNELID);
     });
 
     describe('with data-live-channelid', function () {
@@ -256,6 +262,14 @@ describes.realWin(
       expect(iframe.src).to.equal(EXAMPLE_LIVE_CHANNELID_URL);
     });
 
+    it('renders for channel ids', async () => {
+      const yt = await getYt({'data-channelid': EXAMPLE_CHANNELID});
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.include(EXAMPLE_CHANNELID_URL);
+    });
+
     it('uses privacy-enhanced mode', async () => {
       const yt = await getYt({
         'data-videoid': EXAMPLE_VIDEOID,
@@ -267,10 +281,10 @@ describes.realWin(
       expect(iframe.src).to.equal(EXAMPLE_NO_COOKIE_VIDEOID_URL);
     });
 
-    it('requires data-videoid or data-live-channelid', () => {
+    it('requires exactly one of data-videoid, data-live-channelid or data-channelid', () => {
       return allowConsoleError(() => {
         return getYt({}).should.eventually.be.rejectedWith(
-          /Exactly one of data-videoid or data-live-channelid should/
+          /Exactly one of data-videoid, data-live-channelid or data-channelid should be present/
         );
       });
     });
