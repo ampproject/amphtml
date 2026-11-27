@@ -34,7 +34,7 @@ import {
 } from '../amp-story-store-service';
 import {EventType, dispatch} from '../events';
 import {MediaType_Enum} from '../media-pool';
-import {AdvancementMode} from '../story-analytics';
+import {AdvancementMode, StoryAnalyticsEvent} from '../story-analytics';
 import * as utils from '../utils';
 
 // Represents the correct value of KeyboardEvent.which for the Right Arrow
@@ -993,6 +993,27 @@ describes.realWin(
 
         story.storeService_.dispatch(Action.TOGGLE_MUTED, true);
         expect(story.element.hasAttribute('muted')).to.be.true;
+      });
+
+      it('should trigger analytics event on captions toggle', async () => {
+        await createStoryWithPages(2, ['cover', 'page-1']);
+
+        const triggerSpy = env.sandbox.spy(
+          story.analyticsService_,
+          'triggerEvent'
+        );
+
+        await story.layoutCallback();
+
+        story.storeService_.dispatch(Action.TOGGLE_CAPTIONS, false);
+        expect(triggerSpy).to.have.been.calledWith(
+          StoryAnalyticsEvent.STORY_CAPTIONS_OFF
+        );
+
+        story.storeService_.dispatch(Action.TOGGLE_CAPTIONS, true);
+        expect(triggerSpy).to.have.been.calledWith(
+          StoryAnalyticsEvent.STORY_CAPTIONS_ON
+        );
       });
 
       describe('#getMaxMediaElementCounts', () => {

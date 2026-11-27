@@ -145,6 +145,14 @@ The `story-audio-muted` trigger is fired when the user initiates an interaction 
 
 The `story-audio-unmuted` trigger is fired when the user initiates an interaction to unmute the audio for the current story.
 
+### Captions on trigger (`"on": "story-captions-on"`)
+
+The `story-captions-on` trigger is fired when the user initiates an interaction to turn captions on for the current story.
+
+### Captions off trigger (`"on": "story-captions-off"`)
+
+The `story-captions-off` trigger is fired when the user initiates an interaction to turn captions off for the current story.
+
 ### Page attachment enter trigger (`"on": "story-page-attachment-enter"`)
 
 The `story-page-attachment-enter` trigger is fired when a page attachment is opened by the user.
