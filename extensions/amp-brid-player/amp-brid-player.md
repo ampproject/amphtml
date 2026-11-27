@@ -3,12 +3,12 @@ $category@: media
 formats:
   - websites
 teaser:
-  text: Displays a Brid.tv player.
+  text: Displays a TargetVideo player.
 ---
 
 # amp-brid-player
 
-An `amp-brid-player` displays the Brid Player used in [Brid.tv](https://www.brid.tv/) Video Platform.
+An `amp-brid-player` displays the TargetVideo player (formerly Brid Player) used in the [TargetVideo](https://target-video.com/) video platform. It is also available as `amp-target-video-player`.
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
@@ -40,30 +40,30 @@ If this attribute is present, and the browser supports autoplay:
 
 ### `data-partner`
 
-The Brid.tv partner ID.
+The TargetVideo partner ID.
 
 ### `data-player`
 
-The Brid.tv player ID. Specific to every partner.
+The TargetVideo player ID. Specific to every partner.
 
 ### `data-video`
 
-The Brid.tv video ID. Embed code must either have `video`, `playlist`, `carousel`
+The TargetVideo video ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-playlist`
 
-The Brid.tv playlist ID or custom string value for dynamic playlists. Embed code
+The TargetVideo playlist ID or custom string value for dynamic playlists. Embed code
 must either have `video`, `playlist`, `carousel` or `outstream` attribute.
 
 ### `data-carousel`
 
-The Brid.tv carousel ID. Embed code must either have `video`, `playlist`, `carousel`
+The TargetVideo carousel ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-outstream`
 
-The Brid.tv outstream unit ID. Embed code must either have `video`, `playlist`, `carousel`
+The TargetVideo outstream unit ID. Embed code must either have `video`, `playlist`, `carousel`
 or `outstream` attribute.
 
 ### `data-dynamic`
