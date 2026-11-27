@@ -1,7 +1,9 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "cpp/htmlparser/defer.h"
 #include "cpp/htmlparser/fileutil.h"

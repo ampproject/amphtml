@@ -129,7 +129,7 @@ class Node {
 
   // Debug/Logging utils.
   // Outputs node debug info.
-  std::string DebugString();
+  std::string DebugString() const;
 
  private:
   void SetManufactured(bool is_manufactured) {
