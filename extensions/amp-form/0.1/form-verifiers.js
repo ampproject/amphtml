@@ -1,5 +1,6 @@
 import {LastAddedResolver} from '#core/data-structures/promise';
 import {iterateCursor} from '#core/dom';
+import {escapeCssSelectorIdent} from '#core/dom/css-selectors';
 import {isFieldDefault} from '#core/dom/form';
 
 import {user} from '#utils/log';
@@ -214,7 +215,9 @@ export class AsyncVerifier extends FormVerifier {
       // If multiple elements share the same name, the first should be selected.
       // This matches the behavior of HTML5 validation, e.g. with radio buttons.
       const element = user().assertElement(
-        this.form_./*OK*/ querySelector(`[name="${name}"]`),
+        this.form_./*OK*/ querySelector(
+          `[name="${escapeCssSelectorIdent(name)}"]`
+        ),
         'Verification error name property must match a field name'
       );
 
@@ -232,7 +235,11 @@ export class AsyncVerifier extends FormVerifier {
       errors.every((error) => previousError.name !== error.name);
     const fixedElements = previousErrors
       .filter(isFixed)
-      .map((e) => this.form_./*OK*/ querySelector(`[name="${e.name}"]`));
+      .map((e) =>
+        this.form_./*OK*/ querySelector(
+          `[name="${escapeCssSelectorIdent(e.name)}"]`
+        )
+      );
 
     return /** @type {!UpdatedErrorsDef} */ ({
       updatedElements: errorElements.concat(fixedElements),
