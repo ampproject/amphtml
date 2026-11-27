@@ -33,7 +33,7 @@ namespace htmlparser {
 // 0x202f - \xe2\x80\xaf     NARROW NO-BREAK SPACE
 // 0x205f - \xe2\x81\x9f     MEDIUM MATHEMATICAL SPACE
 // 0x3000 - \xe3\x80\x80     IDEOGRAPHIC SPACE
-constexpr static std::array<std::array<uint8_t, 255>, 10> kWhitespaceTable {{
+constexpr static std::array<std::array<uint8_t, 256>, 10> kWhitespaceTable {{
     // Any first byte.
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,  // 20
      1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,  // 40
