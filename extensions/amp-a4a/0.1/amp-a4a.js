@@ -28,7 +28,6 @@ import {triggerAnalyticsEvent} from '#utils/analytics';
 import {DomTransformStream} from '#utils/dom-transform-stream';
 import {listenOnce} from '#utils/event-helper';
 import {dev, devAssert, logHashParam, user, userAssert} from '#utils/log';
-import {isAttributionReportingAllowed} from '#utils/privacy-sandbox-utils';
 
 import {canSetCookie, getCookie} from 'src/cookies';
 
@@ -2071,11 +2070,7 @@ export class AmpA4A extends AMP.BaseElement {
     // Block synchronous XHR in ad. These are very rare, but super bad for UX
     // as they block the UI thread for the arbitrary amount of time until the
     // request completes.
-    let featurePolicies = "sync-xhr 'none';";
-
-    if (isAttributionReportingAllowed(this.win.document)) {
-      featurePolicies += "attribution-reporting 'src';";
-    }
+    const featurePolicies = "sync-xhr 'none';";
 
     mergedAttributes['allow'] = featurePolicies;
 
