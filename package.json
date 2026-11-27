@@ -12,7 +12,14 @@
   },
   "scripts": {
     "preinstall": "node build-system/common/check-package-manager.js",
-    "postinstall": "node build-system/task-runner/install-amp-task-runner.js"
+    "postinstall": "node build-system/task-runner/install-amp-task-runner.js",
+    "serve": "node amp.js serve",
+    "build": "node amp.js build",
+    "dev": "node amp.js default",
+    "lint": "node amp.js lint --local_changes",
+    "lint:all": "node amp.js lint",
+    "lint:fix": "node amp.js lint --local_changes --fix",
+    "test": "node amp.js unit"
   },
   "dependencies": {
     "@ampproject/animations": "0.2.2",
