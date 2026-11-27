@@ -19,6 +19,7 @@ BaseElement['props'] = {
   'controls': {attr: 'controls', type: 'boolean'},
   'videoid': {attr: 'data-videoid'},
   'liveChannelid': {attr: 'data-live-channelid'},
+  'channelid': {attr: 'data-channelid'},
   'dock': {attr: 'dock', media: true},
   'credentials': {attr: 'credentials'},
   // TODO(wg-components): Current behavior defaults to loading="auto".
